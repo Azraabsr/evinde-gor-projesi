@@ -60,8 +60,6 @@
     <div class="model-selector">
         <select id="modelSelector">
             <option value="old_chair">Eski Sandalye</option>
-            <option value="modern_chair">Modern Sandalye</option>
-            <option value="table">Masa</option>
         </select>
     </div>
     
@@ -73,7 +71,7 @@
 
     <model-viewer 
         id="ar-viewer"
-        src="https://modelviewer.dev/shared-assets/models/old_chair.gltf" 
+        src="models/old_chair.gltf" 
         alt="3D Model" 
         ar 
         ar-modes="webxr scene-viewer quick-look" 
@@ -100,13 +98,13 @@
             const qrcodeContainer = document.getElementById('qrcode');
             
             function generateQRCode(modelName) {
+                // Her iki durumda da kullanılacak değişkenleri dışarıda tanımlayın
+                const websiteUrl = "https://Azraabsr.github.io/evinde-gor-projesi";
+                const arUrl = `${websiteUrl}?m=${modelName}`; // m parametresi (kısa)
+                
                 try {
                     // QR kod oluşturma (Sürüm 10 kullanarak)
                     const qr = qrcode(10, 'L'); // Sürüm 10 kullanın (daha fazla veri kapasitesi için)
-                    
-                    // URL'yi mümkün olduğunca kısa tutun
-                    const websiteUrl = "https://Azraabsr.github.io/evinde-gor-projesi";
-                    const arUrl = `${websiteUrl}?m=${modelName}`; // m parametresi (kısa)
                     
                     qr.addData(arUrl);
                     qr.make();
@@ -124,9 +122,6 @@
                     console.error("QR kod oluşturma hatası:", error);
                     
                     // QR kod oluşturulamazsa sadece link göster
-                    const websiteUrl = "https://Azraabsr.github.io/evinde-gor-projesi";
-                    const arUrl = `${websiteUrl}?m=${modelName}`;
-                    
                     qrcodeContainer.innerHTML = `
                         <div>
                             <h3>Ürünü evinde görmek için linke tıkla</h3>
@@ -149,14 +144,8 @@
                 console.log("URL'den model yükleniyor:", modelParam);
                 modelSelector.value = modelParam;
                 
-                // Hazır modelleri kullan
-                if (modelParam === 'old_chair') {
-                    modelViewer.src = "https://modelviewer.dev/shared-assets/models/old_chair.gltf";
-                } else if (modelParam === 'modern_chair') {
-                    modelViewer.src = "https://modelviewer.dev/shared-assets/models/modern_chair.gltf";
-                } else if (modelParam === 'table') {
-                    modelViewer.src = "https://modelviewer.dev/shared-assets/models/table.gltf";
-                }
+                // Kendi modelinizi kullanın
+                modelViewer.src = `models/${modelParam}.gltf`;
                 
                 modelViewer.addEventListener('load', function() {
                     console.log("Model başarıyla yüklendi");
@@ -164,22 +153,15 @@
                 
                 modelViewer.addEventListener('error', function(error) {
                     console.error("Model yüklenirken hata oluştu:", error);
+                    // Hata durumunda varsayılan modele dön
+                    modelViewer.src = "models/old_chair.gltf";
                 });
             }
             
             // Model değiştiğinde
             modelSelector.addEventListener('change', function() {
                 const selectedModel = this.value;
-                
-                // Hazır modelleri kullan
-                if (selectedModel === 'old_chair') {
-                    modelViewer.src = "https://modelviewer.dev/shared-assets/models/old_chair.gltf";
-                } else if (selectedModel === 'modern_chair') {
-                    modelViewer.src = "https://modelviewer.dev/shared-assets/models/modern_chair.gltf";
-                } else if (selectedModel === 'table') {
-                    modelViewer.src = "https://modelviewer.dev/shared-assets/models/table.gltf";
-                }
-                
+                modelViewer.src = `models/${selectedModel}.gltf`;
                 generateQRCode(selectedModel);
             });
             
