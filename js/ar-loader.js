@@ -8,4 +8,4 @@ window.onload = function() {
     if (modelParam) {
         modelViewer.src = `models/${modelParam}.gltf`;
     }
-} 
+}
