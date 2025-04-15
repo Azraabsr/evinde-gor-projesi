@@ -62,6 +62,13 @@
         .not-supported {
             color: red;
         }
+        .ar-tips {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #fff3cd;
+            border-radius: 5px;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -78,12 +85,25 @@
     <div class="ar-info">
         <p>AR özelliğini kullanmak için:</p>
         <ol style="text-align: left; max-width: 400px; margin: 0 auto;">
-            <li>AR uyumlu modern bir telefon kullanın (iPhone veya yeni Android)</li>
+            <li>AR uyumlu modern bir telefon kullanın</li>
             <li>Kamera izinlerini verin</li>
-            <li>Telefonu hareket ettirerek zemini taratın</li>
+            <li><strong>Telefonu yavaşça hareket ettirin ve farklı açılardan zemini taratın</strong></li>
+            <li>Yeterli ışık olduğundan emin olun</li>
+            <li><strong>Doku içeren zeminde kullanın (düz beyaz zeminden kaçının)</strong></li>
             <li>Modeli yerleştirmek için ekrana dokunun</li>
         </ol>
         <div id="ar-status-container"></div>
+        
+        <div class="ar-tips">
+            <p>Model yanlış yerde görünüyorsa:</p>
+            <ol style="text-align: left; max-width: 400px; margin: 0 auto;">
+                <li>Telefonu daha yavaş hareket ettirin</li>
+                <li>Daha fazla zemini taratın</li>
+                <li>Işık seviyesini artırın</li>
+                <li>Daha belirgin dokuları olan bir zemin deneyin</li>
+                <li>AR'dan çıkıp tekrar deneyin</li>
+            </ol>
+        </div>
     </div>
 
     <!-- Normal 3D Görüntüleyici -->
@@ -108,24 +128,18 @@
             // Tam URL'yi alın, modelin tam yolu olmalı
             const modelUrl = "https://Azraabsr.github.io/evinde-gor-projesi/models/old_chair.gltf";
             
-            // Scene Viewer URL'sini oluştur
-            // Method 1: Direct URL
-            const sceneViewerUrl = `https://arvr.google.com/scene-viewer/1.0?file=${modelUrl}&mode=ar_preferred`;
+            // Scene Viewer URL'sini oluştur - Gelişmiş Parametrelerle
+            // title: Modelin adı
+            // resizable: true - Kullanıcının ölçeği ayarlamasına izin verir
+            // sound: false - Ses kapalı
+            // link: false - Paylaşım linki kapalı
+            // initialPlacement: "floor" - Zeminde başlat
+            // disable_occlusion: true - Çakışma desteğini kapat (daha iyi yüzey algılama için)
+            const sceneViewerUrl = `https://arvr.google.com/scene-viewer/1.0?file=${modelUrl}&mode=ar_preferred&title=Evinde Gör&resizable=true&sound=false&link=false&initialPlacement=floor&disable_occlusion=true`;
             
-            // Method 2: Intent URL
-            const intentUrl = `intent://arvr.google.com/scene-viewer/1.0?file=${modelUrl}&mode=ar_preferred#Intent;scheme=https;package=com.google.android.googlequicksearchbox;action=android.intent.action.VIEW;S.browser_fallback_url=${encodeURIComponent(window.location.href)};end;`;
-            
-            // Birden fazla yöntemi deneyelim
             try {
                 console.log("Android AR başlatılıyor...");
-                // Yöntem 1: Direkt URL (daha basit)
                 window.location = sceneViewerUrl;
-                
-                // Yedek yöntem (JavaScript setTimeout ile)
-                setTimeout(function() {
-                    // Yöntem 2: Intent URL (daha karmaşık ama bazen daha güvenilir)
-                    window.location = intentUrl;
-                }, 1000);
             } catch (error) {
                 console.error("AR başlatılamadı:", error);
                 alert("AR başlatılamadı. Lütfen Chrome veya Samsung Internet tarayıcısı kullanın.");
@@ -149,7 +163,12 @@
                 
                 if (isAndroid) {
                     statusHTML += '<p class="supported">✓ Android cihaz tespit edildi</p>';
-                    statusHTML += '<p>Google AR Services yüklü olmalıdır</p>';
+                    statusHTML += '<p>Optimize AR deneyimi için:</p>';
+                    statusHTML += '<ul style="text-align: left; max-width: 400px; margin: 0 auto;">';
+                    statusHTML += '<li>Yeterli ışık olduğundan emin olun</li>';
+                    statusHTML += '<li>Google AR Services yüklü olmalıdır</li>';
+                    statusHTML += '<li>Desenli/dokulu bir zeminde kullanın</li>';
+                    statusHTML += '</ul>';
                 } else {
                     statusHTML += '<p class="not-supported">Bu site Android cihazlarda en iyi çalışır</p>';
                 }
