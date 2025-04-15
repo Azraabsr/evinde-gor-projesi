@@ -11,6 +11,7 @@
             width: 100%;
             height: 500px;
             margin: 0 auto;
+            background-color: #f0f0f0;
         }
         .ar-button {
             display: block;
@@ -23,6 +24,8 @@
             line-height: 50px;
             text-decoration: none;
             border-radius: 5px;
+            font-weight: bold;
+            font-size: 18px;
         }
         #qrcode {
             display: flex;
@@ -52,6 +55,24 @@
             margin: 20px auto;
             width: 200px;
         }
+        .ar-info {
+            text-align: center;
+            margin: 10px 0;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+        }
+        .ar-status {
+            margin-top: 10px;
+            text-align: center;
+            font-weight: bold;
+        }
+        .supported {
+            color: green;
+        }
+        .not-supported {
+            color: red;
+        }
     </style>
 </head>
 <body>
@@ -65,30 +86,51 @@
     
     <div id="qrcode"></div>
     
-    <button onclick="showARModal()" class="evinde-gor-button">
-        Evinde Gör
+    <div class="ar-info">
+        <p>AR özelliğini kullanmak için:</p>
+        <ol style="text-align: left; max-width: 400px; margin: 0 auto;">
+            <li>AR uyumlu modern bir telefon kullanın (iPhone veya yeni Android)</li>
+            <li>Kamera izinlerini verin</li>
+            <li>Telefonu hareket ettirerek zemini taratın</li>
+            <li>Modeli yerleştirmek için ekrana dokunun</li>
+        </ol>
+        <div id="ar-status-container"></div>
+    </div>
+    
+    <button onclick="activateAR()" class="evinde-gor-button">
+        Evinde Gör (AR)
     </button>
 
     <model-viewer 
         id="ar-viewer"
         src="models/old_chair.gltf" 
         alt="3D Model" 
-        ar 
-        ar-modes="webxr scene-viewer quick-look" 
-        camera-controls 
+        ar
+        ar-scale="fixed"
+        ar-placement="floor"
+        ar-modes="webxr scene-viewer quick-look"
+        camera-controls
+        environment-image="neutral"
+        shadow-intensity="1"
         auto-rotate>    
         <button slot="ar-button" class="ar-button">
-            Evinde Gör
+            AR'da Görüntüle
         </button>
     </model-viewer>
 
     <script>
-        // AR modal fonksiyonu
-        function showARModal() {
+        // AR'ı aktifleştir
+        function activateAR() {
             // AR butonuna tıklama olayı ekle
-            const arButton = document.querySelector('.ar-button');
+            const arButton = document.querySelector('model-viewer').shadowRoot.querySelector('button[slot="ar-button"]');
+            
             if (arButton) {
-                arButton.click(); // AR modunu otomatik başlat
+                // AR butonuna tıkla
+                arButton.click();
+                console.log("AR butonu tıklandı");
+            } else {
+                console.error("AR butonu bulunamadı");
+                alert("AR butonu bulunamadı. Lütfen farklı bir tarayıcı veya cihaz kullanın.");
             }
         }
         
@@ -96,6 +138,35 @@
             const modelSelector = document.getElementById('modelSelector');
             const modelViewer = document.getElementById('ar-viewer');
             const qrcodeContainer = document.getElementById('qrcode');
+            const arStatusContainer = document.getElementById('ar-status-container');
+            
+            // AR durumunu kontrol et ve göster
+            checkARSupport();
+            
+            function checkARSupport() {
+                let statusHTML = '<div class="ar-status">';
+                
+                // WebXR API kontrolü
+                if (navigator.xr) {
+                    navigator.xr.isSessionSupported('immersive-ar')
+                        .then((supported) => {
+                            if (supported) {
+                                statusHTML += '<p class="supported">✓ AR destekleniyor</p>';
+                            } else {
+                                statusHTML += '<p class="not-supported">✗ Cihazınız AR desteği sunmuyor</p>';
+                            }
+                            arStatusContainer.innerHTML = statusHTML + '</div>';
+                        })
+                        .catch(error => {
+                            statusHTML += `<p class="not-supported">✗ AR kontrol edilirken hata: ${error}</p>`;
+                            arStatusContainer.innerHTML = statusHTML + '</div>';
+                        });
+                } else {
+                    statusHTML += '<p class="not-supported">✗ Tarayıcınız WebXR API desteklemiyor</p>';
+                    statusHTML += '<p>Önerilen: Chrome, Safari (iOS), Samsung Internet</p>';
+                    arStatusContainer.innerHTML = statusHTML + '</div>';
+                }
+            }
             
             function generateQRCode(modelName) {
                 // Her iki durumda da kullanılacak değişkenleri dışarıda tanımlayın
@@ -133,6 +204,24 @@
                 console.log("Oluşturulan URL:", arUrl);
             }
             
+            // Model yüklemesi için olay dinleyicisi
+            modelViewer.addEventListener('load', function() {
+                console.log("Model başarıyla yüklendi");
+            });
+            
+            modelViewer.addEventListener('error', function(error) {
+                console.error("Model yüklenirken hata oluştu:", error);
+            });
+            
+            // AR modu için olay dinleyicileri
+            modelViewer.addEventListener('ar-status', event => {
+                console.log('AR Status:', event.detail.status);
+            });
+            
+            modelViewer.addEventListener('ar-tracking', event => {
+                console.log('AR Tracking:', event.detail.status);
+            });
+            
             // Sayfa yüklendiğinde QR kodu oluştur
             generateQRCode(modelSelector.value);
             
@@ -142,20 +231,13 @@
             
             if (modelParam) {
                 console.log("URL'den model yükleniyor:", modelParam);
-                modelSelector.value = modelParam;
+                
+                if (modelSelector.querySelector(`option[value="${modelParam}"]`)) {
+                    modelSelector.value = modelParam;
+                }
                 
                 // Kendi modelinizi kullanın
                 modelViewer.src = `models/${modelParam}.gltf`;
-                
-                modelViewer.addEventListener('load', function() {
-                    console.log("Model başarıyla yüklendi");
-                });
-                
-                modelViewer.addEventListener('error', function(error) {
-                    console.error("Model yüklenirken hata oluştu:", error);
-                    // Hata durumunda varsayılan modele dön
-                    modelViewer.src = "models/old_chair.gltf";
-                });
             }
             
             // Model değiştiğinde
@@ -164,26 +246,6 @@
                 modelViewer.src = `models/${selectedModel}.gltf`;
                 generateQRCode(selectedModel);
             });
-            
-            // AR uyumluluğunu kontrol et
-            if (navigator.xr) {
-                navigator.xr.isSessionSupported('immersive-ar')
-                    .then((supported) => {
-                        if (supported) {
-                            console.log('AR destekleniyor');
-                        } else {
-                            console.log('AR desteklenmiyor');
-                            const arStatus = document.createElement('div');
-                            arStatus.innerHTML = '<p style="color: red; text-align: center;">Cihazınız AR özelliğini desteklemiyor</p>';
-                            document.body.appendChild(arStatus);
-                        }
-                    });
-            } else {
-                console.log('WebXR API desteklenmiyor');
-                const arStatus = document.createElement('div');
-                arStatus.innerHTML = '<p style="color: red; text-align: center;">Tarayıcınız AR özelliğini desteklemiyor</p>';
-                document.body.appendChild(arStatus);
-            }
         });
     </script>
 </body>
