@@ -2,174 +2,162 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Evinde Gör - AR Deneyimi</title>
     <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
-    <!-- QR Kod Kütüphanesi -->
-    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+    <!-- Doğru QR kod kütüphanesi -->
+    <script src="https://cdn.rawgit.com/davidshimjs/qrcodejs/gh-pages/qrcode.min.js"></script>
     <style>
         body {
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f8f9fa;
-        }
-        .container {
+            font-family: Arial, sans-serif;
             max-width: 800px;
             margin: 0 auto;
             padding: 20px;
-        }
-        .header {
             text-align: center;
-            margin-bottom: 20px;
         }
         model-viewer {
             width: 100%;
             height: 400px;
-            margin: 0 auto;
-            background-color: #fafafa;
-            border-radius: 10px;
-        }
-        .product-info {
-            background-color: white;
-            border-radius: 10px;
-            padding: 20px;
-            margin-top: 20px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        }
-        .button {
-            display: block;
-            width: 80%;
-            max-width: 300px;
-            height: 50px;
             margin: 20px auto;
+            background-color: #f5f5f5;
+            border-radius: 8px;
+        }
+        .ar-button {
+            display: inline-block;
             background-color: #4CAF50;
             color: white;
-            text-align: center;
-            line-height: 50px;
-            text-decoration: none;
-            border-radius: 5px;
-            font-weight: bold;
-            font-size: 18px;
+            padding: 12px 24px;
+            margin: 10px 0;
             border: none;
+            border-radius: 4px;
             cursor: pointer;
+            font-size: 16px;
+            text-decoration: none;
         }
-        .scale-buttons {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            margin: 15px 0;
+        .scale-options {
+            margin: 20px 0;
         }
         .scale-button {
-            padding: 10px;
-            background-color: #e9ecef;
-            border: none;
-            border-radius: 5px;
+            padding: 8px 16px;
+            margin: 0 5px;
+            background-color: #eee;
+            border: 1px solid #ddd;
+            border-radius: 4px;
             cursor: pointer;
         }
         .scale-button.active {
             background-color: #4CAF50;
             color: white;
         }
-        #qrcode {
-            text-align: center;
-            margin: 20px auto;
-        }
-        .qr-container {
-            background-color: white;
-            padding: 15px;
+        .qr-section {
+            margin: 30px 0;
+            padding: 20px;
+            background-color: #f9f9f9;
             border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            max-width: 200px;
-            margin: 0 auto;
+        }
+        #qrcode {
+            margin: 15px auto;
+        }
+        .ar-links {
+            margin: 30px 0;
+        }
+        .info-box {
+            padding: 15px;
+            background-color: #e9f7ef;
+            border-radius: 8px;
+            margin: 20px 0;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>Evinde Gör</h1>
-        </div>
-        
-        <!-- 3D Görüntüleyici -->
-        <model-viewer 
-            id="product-model"
-            src="models/old_chair.gltf" 
-            alt="3D Model"
-            camera-controls
-            auto-rotate
-            environment-image="neutral"
-            shadow-intensity="1"
-            ar
-            ar-modes="webxr scene-viewer quick-look"
-            ar-scale="auto">
-        </model-viewer>
-        
-        <div class="scale-buttons">
-            <button class="scale-button active" data-scale="0.01">Çok Küçük (0.01)</button>
-            <button class="scale-button" data-scale="0.05">Küçük (0.05)</button>
-            <button class="scale-button" data-scale="0.1">Normal (0.1)</button>
-        </div>
-        
-        <div class="product-info">
-            <h2>Ahşap Sandalye</h2>
-            <p>Doğal ahşap görünümlü, rahat oturumlu klasik sandalye.</p>
-            
-            <!-- QR Kod -->
-            <div class="qr-container">
-                <div id="qrcode"></div>
-                <p>QR kodu telefonunuzla tarayın</p>
-            </div>
-            
-            <!-- Scene Viewer Butonları -->
-            <a href="https://arvr.google.com/scene-viewer/1.0?file=https://azraabsr.github.io/evinde-gor-projesi/models/old_chair.gltf&mode=ar_preferred&scale=0.01" class="button">
-                AR Görüntüle (Çok Küçük Ölçek)
-            </a>
-            
-            <a href="https://arvr.google.com/scene-viewer/1.0?file=https://azraabsr.github.io/evinde-gor-projesi/models/old_chair.gltf&mode=ar_preferred&scale=0.005" class="button" style="background-color: #ff9800;">
-                AR Görüntüle (Daha da Küçük)
-            </a>
-            
-            <a href="https://arvr.google.com/scene-viewer/1.0?file=https://azraabsr.github.io/evinde-gor-projesi/models/old_chair.gltf&mode=ar_preferred&scale=0.001" class="button" style="background-color: #2196F3;">
-                AR Görüntüle (Minyatür Boyut)
-            </a>
-            
-            <div style="text-align: center; margin-top: 20px;">
-                <p><strong>Yukarıdaki butonlardan birini seçerek AR deneyimini başlatın</strong></p>
-                <p>Not: Model çok büyük görünüyorsa, daha küçük ölçekli butonları deneyin</p>
-            </div>
-        </div>
+    <h1>Evinde Gör</h1>
+    <p>Ürünü AR teknolojisiyle evinizde görün!</p>
+    
+    <!-- 3D Model Görüntüleyici -->
+    <model-viewer 
+        id="product-model"
+        src="models/old_chair.gltf" 
+        alt="3D Sandalye Modeli" 
+        camera-controls 
+        auto-rotate 
+        ar 
+        ar-modes="webxr scene-viewer quick-look"
+        ar-scale="auto"
+        shadow-intensity="1">
+    </model-viewer>
+    
+    <!-- Ölçek Butonları -->
+    <div class="scale-options">
+        <p>3D Görünüm Ölçeği:</p>
+        <button class="scale-button active" data-scale="0.1">Normal</button>
+        <button class="scale-button" data-scale="0.05">Küçük</button>
+        <button class="scale-button" data-scale="0.01">Çok Küçük</button>
+    </div>
+    
+    <!-- AR Deneyimi Linkleri -->
+    <div class="ar-links">
+        <p><strong>AR ile Görüntülemek için:</strong></p>
+        <a href="https://arvr.google.com/scene-viewer/1.0?file=https://azraabsr.github.io/evinde-gor-projesi/models/old_chair.gltf&mode=ar_preferred&scale=0.1" class="ar-button">
+            Normal Boyut (0.1)
+        </a><br>
+        <a href="https://arvr.google.com/scene-viewer/1.0?file=https://azraabsr.github.io/evinde-gor-projesi/models/old_chair.gltf&mode=ar_preferred&scale=0.01" class="ar-button" style="background-color: #2196F3;">
+            Küçük Boyut (0.01)
+        </a><br>
+        <a href="https://arvr.google.com/scene-viewer/1.0?file=https://azraabsr.github.io/evinde-gor-projesi/models/old_chair.gltf&mode=ar_preferred&scale=0.001" class="ar-button" style="background-color: #FF9800;">
+            Minyatür Boyut (0.001)
+        </a>
+    </div>
+    
+    <!-- QR Kod Bölümü -->
+    <div class="qr-section">
+        <h2>QR Kodu Tara</h2>
+        <p>Telefonunuzla tarayarak ürünü AR ile görüntüleyin:</p>
+        <div id="qrcode"></div>
+    </div>
+    
+    <div class="info-box">
+        <p>Not: AR özelliğini kullanmak için AR destekli bir Android cihaz ve Chrome tarayıcısı gereklidir. 
+        iPhone kullanıcıları için Safari tarayıcısı önerilir.</p>
     </div>
 
     <script>
         document.addEventListener("DOMContentLoaded", function() {
-            const scaleButtons = document.querySelectorAll(".scale-button");
+            // Model ve ölçek
             const modelViewer = document.getElementById("product-model");
+            const scaleButtons = document.querySelectorAll(".scale-button");
             
-            // Ölçek butonları
+            // Ölçek butonları için olay dinleyicisi
             scaleButtons.forEach(button => {
                 button.addEventListener("click", function() {
                     const scale = this.dataset.scale;
                     
-                    // Aktif butonu güncelle
+                    // Aktif sınıfını güncelle
                     scaleButtons.forEach(btn => btn.classList.remove("active"));
                     this.classList.add("active");
                     
-                    // Model ölçeğini güncelle
+                    // Model ölçeğini ayarla
                     modelViewer.setAttribute("scale", `${scale} ${scale} ${scale}`);
                 });
             });
             
-            // QR kod oluştur
-            const qrUrl = "https://azraabsr.github.io/evinde-gor-projesi/ar-viewer.html";
-            new QRCode(document.getElementById("qrcode"), {
-                text: qrUrl,
-                width: 128,
-                height: 128,
-                colorDark: "#000000",
-                colorLight: "#ffffff",
-                correctLevel: QRCode.CorrectLevel.H
-            });
+            // QR kod oluştur (direkt küçük ölçekli linki ekle)
+            const qrUrl = "https://arvr.google.com/scene-viewer/1.0?file=https://azraabsr.github.io/evinde-gor-projesi/models/old_chair.gltf&mode=ar_preferred&scale=0.01";
+            
+            // QR kod oluşturucu
+            try {
+                new QRCode(document.getElementById("qrcode"), {
+                    text: qrUrl,
+                    width: 128,
+                    height: 128,
+                    colorDark: "#000000",
+                    colorLight: "#ffffff",
+                    correctLevel: QRCode.CorrectLevel.H
+                });
+            } catch (error) {
+                console.error("QR kod oluşturma hatası:", error);
+                document.getElementById("qrcode").innerHTML = 
+                    "<p>QR kod oluşturulamadı. Lütfen yukarıdaki linklerden birini kullanın.</p>";
+            }
         });
     </script>
 </body>
