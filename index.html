@@ -51,23 +51,26 @@
             background-color: #f9f9f9;
             border-radius: 5px;
         }
-        .ar-status {
-            margin-top: 10px;
-            text-align: center;
-            font-weight: bold;
-        }
-        .supported {
-            color: green;
-        }
-        .not-supported {
-            color: red;
-        }
         .ar-tips {
             margin-top: 10px;
             padding: 10px;
             background-color: #fff3cd;
             border-radius: 5px;
             font-weight: bold;
+        }
+        .scale-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 10px 0;
+        }
+        .scale-button {
+            padding: 5px 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
         }
     </style>
 </head>
@@ -83,25 +86,22 @@
     <div id="qrcode"></div>
     
     <div class="ar-info">
-        <p>AR özelliğini kullanmak için:</p>
-        <ol style="text-align: left; max-width: 400px; margin: 0 auto;">
-            <li>AR uyumlu modern bir telefon kullanın</li>
-            <li>Kamera izinlerini verin</li>
-            <li><strong>Telefonu yavaşça hareket ettirin ve farklı açılardan zemini taratın</strong></li>
-            <li>Yeterli ışık olduğundan emin olun</li>
-            <li><strong>Doku içeren zeminde kullanın (düz beyaz zeminden kaçının)</strong></li>
-            <li>Modeli yerleştirmek için ekrana dokunun</li>
-        </ol>
-        <div id="ar-status-container"></div>
+        <p>Modelin ölçeğini ayarlamak için:</p>
+        <div class="scale-buttons">
+            <button class="scale-button" onclick="setModelScale(0.1)">Çok Küçük</button>
+            <button class="scale-button" onclick="setModelScale(0.5)">Küçük</button>
+            <button class="scale-button" onclick="setModelScale(1)">Normal</button>
+            <button class="scale-button" onclick="setModelScale(2)">Büyük</button>
+        </div>
         
         <div class="ar-tips">
             <p>Model yanlış yerde görünüyorsa:</p>
             <ol style="text-align: left; max-width: 400px; margin: 0 auto;">
+                <li>Uygulamadan çıkıp tekrar deneyin</li>
+                <li>Daha iyi ışık olan bir ortamda deneyin</li>
+                <li>Farklı bir ölçek seçin</li>
                 <li>Telefonu daha yavaş hareket ettirin</li>
-                <li>Daha fazla zemini taratın</li>
-                <li>Işık seviyesini artırın</li>
-                <li>Daha belirgin dokuları olan bir zemin deneyin</li>
-                <li>AR'dan çıkıp tekrar deneyin</li>
+                <li>Zemini daha fazla taratın</li>
             </ol>
         </div>
     </div>
@@ -114,6 +114,7 @@
         camera-controls
         environment-image="neutral"
         shadow-intensity="1"
+        scale="1 1 1"
         auto-rotate>    
     </model-viewer>
     
@@ -123,23 +124,44 @@
     </button>
 
     <script>
+        // Global değişkenler
+        let currentModelScale = 1;
+        
+        // Model ölçeğini ayarlama
+        function setModelScale(scale) {
+            currentModelScale = scale;
+            document.getElementById('ar-viewer').setAttribute('scale', `${scale} ${scale} ${scale}`);
+            console.log(`Model ölçeği ${scale} olarak ayarlandı`);
+        }
+        
         // Android AR'ı başlatma fonksiyonu
         function launchAndroidAR() {
-            // Tam URL'yi alın, modelin tam yolu olmalı
+            // Google'ın örnek modellerinden birini kullanalım (güvenilir kaynak)
+            // const modelUrl = "https://modelviewer.dev/shared-assets/models/Astronaut.glb";
+            
+            // Kendi modelimiz
             const modelUrl = "https://Azraabsr.github.io/evinde-gor-projesi/models/old_chair.gltf";
             
-            // Scene Viewer URL'sini oluştur - Gelişmiş Parametrelerle
-            // title: Modelin adı
-            // resizable: true - Kullanıcının ölçeği ayarlamasına izin verir
-            // sound: false - Ses kapalı
-            // link: false - Paylaşım linki kapalı
-            // initialPlacement: "floor" - Zeminde başlat
-            // disable_occlusion: true - Çakışma desteğini kapat (daha iyi yüzey algılama için)
-            const sceneViewerUrl = `https://arvr.google.com/scene-viewer/1.0?file=${modelUrl}&mode=ar_preferred&title=Evinde Gör&resizable=true&sound=false&link=false&initialPlacement=floor&disable_occlusion=true`;
+            // Scene Viewer URL'sini optimize edilmiş parametrelerle oluştur
+            // scale: Ölçeği ayarlar (0-100 arası, 100 = %100)
+            const scalePercent = Math.min(Math.max(currentModelScale * 50, 10), 100); // Ölçeği 10-100 arasında sınırla
+            
+            const sceneViewerUrl = `https://arvr.google.com/scene-viewer/1.0?file=${modelUrl}&mode=ar_preferred&title=Evinde%20G%C3%B6r&resizable=true&disable_occlusion=true&initial_scale=${scalePercent}`;
+            
+            // Backup URL: Eğer yukarıdaki URL çalışmazsa
+            const backupUrl = `intent://arvr.google.com/scene-viewer/1.0?file=${modelUrl}&mode=ar_preferred&title=Evinde%20G%C3%B6r&resizable=true&initial_scale=${scalePercent}#Intent;scheme=https;package=com.google.android.googlequicksearchbox;action=android.intent.action.VIEW;S.browser_fallback_url=https://Azraabsr.github.io/evinde-gor-projesi;end;`;
             
             try {
                 console.log("Android AR başlatılıyor...");
+                console.log("Ölçek:", scalePercent, "% olarak ayarlandı");
+                
+                // Önce birinci yöntemi dene
                 window.location = sceneViewerUrl;
+                
+                // 1 saniye sonra yine de çalışmadıysa ikinci yöntemi dene
+                setTimeout(function() {
+                    window.location = backupUrl;
+                }, 1000);
             } catch (error) {
                 console.error("AR başlatılamadı:", error);
                 alert("AR başlatılamadı. Lütfen Chrome veya Samsung Internet tarayıcısı kullanın.");
@@ -150,31 +172,6 @@
             const modelSelector = document.getElementById('modelSelector');
             const modelViewer = document.getElementById('ar-viewer');
             const qrcodeContainer = document.getElementById('qrcode');
-            const arStatusContainer = document.getElementById('ar-status-container');
-            
-            // Cihaz tipini kontrol et
-            const isAndroid = /Android/.test(navigator.userAgent);
-            
-            // AR durumunu kontrol et ve göster
-            checkARSupport();
-            
-            function checkARSupport() {
-                let statusHTML = '<div class="ar-status">';
-                
-                if (isAndroid) {
-                    statusHTML += '<p class="supported">✓ Android cihaz tespit edildi</p>';
-                    statusHTML += '<p>Optimize AR deneyimi için:</p>';
-                    statusHTML += '<ul style="text-align: left; max-width: 400px; margin: 0 auto;">';
-                    statusHTML += '<li>Yeterli ışık olduğundan emin olun</li>';
-                    statusHTML += '<li>Google AR Services yüklü olmalıdır</li>';
-                    statusHTML += '<li>Desenli/dokulu bir zeminde kullanın</li>';
-                    statusHTML += '</ul>';
-                } else {
-                    statusHTML += '<p class="not-supported">Bu site Android cihazlarda en iyi çalışır</p>';
-                }
-                
-                arStatusContainer.innerHTML = statusHTML + '</div>';
-            }
             
             function generateQRCode(modelName) {
                 // Her iki durumda da kullanılacak değişkenleri dışarıda tanımlayın
@@ -241,6 +238,9 @@
                 modelViewer.src = `models/${selectedModel}.gltf`;
                 generateQRCode(selectedModel);
             });
+            
+            // Varsayılan ölçek ayarı
+            setModelScale(0.5); // Başlangıçta küçük ölçek
         });
     </script>
 </body>
