@@ -85,20 +85,8 @@
         </ol>
         <div id="ar-status-container"></div>
     </div>
-    
-    <!-- AR Butonları -->
-    <div id="ar-buttons">
-        <!-- Android için Scene Viewer butonu -->
-        <a id="ar-android" class="button" style="display: none;">
-            Android AR
-        </a>
-        
-        <!-- iOS için Quick Look butonu -->
-        <a id="ar-ios" rel="ar" class="button" style="display: none;">
-            iPhone AR
-        </a>
-    </div>
 
+    <!-- Normal 3D Görüntüleyici -->
     <model-viewer 
         id="ar-viewer"
         src="models/old_chair.gltf" 
@@ -108,56 +96,50 @@
         shadow-intensity="1"
         auto-rotate>    
     </model-viewer>
+    
+    <!-- Android için Doğrudan AR Butonu -->
+    <button onclick="launchAndroidAR()" class="button">
+        Android AR ile Görüntüle
+    </button>
 
     <script>
+        // Android AR'ı başlatma fonksiyonu
+        function launchAndroidAR() {
+            // Tam URL'yi alın, modelin tam yolu olmalı
+            const modelUrl = "https://Azraabsr.github.io/evinde-gor-projesi/models/old_chair.gltf";
+            
+            // Scene Viewer URL'sini oluştur
+            // Method 1: Direct URL
+            const sceneViewerUrl = `https://arvr.google.com/scene-viewer/1.0?file=${modelUrl}&mode=ar_preferred`;
+            
+            // Method 2: Intent URL
+            const intentUrl = `intent://arvr.google.com/scene-viewer/1.0?file=${modelUrl}&mode=ar_preferred#Intent;scheme=https;package=com.google.android.googlequicksearchbox;action=android.intent.action.VIEW;S.browser_fallback_url=${encodeURIComponent(window.location.href)};end;`;
+            
+            // Birden fazla yöntemi deneyelim
+            try {
+                console.log("Android AR başlatılıyor...");
+                // Yöntem 1: Direkt URL (daha basit)
+                window.location = sceneViewerUrl;
+                
+                // Yedek yöntem (JavaScript setTimeout ile)
+                setTimeout(function() {
+                    // Yöntem 2: Intent URL (daha karmaşık ama bazen daha güvenilir)
+                    window.location = intentUrl;
+                }, 1000);
+            } catch (error) {
+                console.error("AR başlatılamadı:", error);
+                alert("AR başlatılamadı. Lütfen Chrome veya Samsung Internet tarayıcısı kullanın.");
+            }
+        }
+        
         document.addEventListener('DOMContentLoaded', function() {
             const modelSelector = document.getElementById('modelSelector');
             const modelViewer = document.getElementById('ar-viewer');
             const qrcodeContainer = document.getElementById('qrcode');
             const arStatusContainer = document.getElementById('ar-status-container');
-            const arAndroidButton = document.getElementById('ar-android');
-            const arIosButton = document.getElementById('ar-ios');
             
             // Cihaz tipini kontrol et
-            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
             const isAndroid = /Android/.test(navigator.userAgent);
-            
-            // AR butonlarını cihaz tipine göre göster
-            if (isIOS) {
-                arIosButton.style.display = 'block';
-                setupIOSAR();
-            } else if (isAndroid) {
-                arAndroidButton.style.display = 'block';
-                setupAndroidAR();
-            } else {
-                // Diğer cihazlar için her iki butonu da göster
-                arIosButton.style.display = 'block';
-                arAndroidButton.style.display = 'block';
-                setupIOSAR();
-                setupAndroidAR();
-            }
-            
-            // Android için Scene Viewer'ı kur
-            function setupAndroidAR() {
-                const modelPath = "https://Azraabsr.github.io/evinde-gor-projesi/models/old_chair.gltf";
-                
-                // Android Scene Viewer'ı etkinleştir
-                const sceneViewerUrl = `intent://arvr.google.com/scene-viewer/1.0?file=${modelPath}&mode=ar_preferred#Intent;scheme=https;package=com.google.android.googlequicksearchbox;action=android.intent.action.VIEW;S.browser_fallback_url=https://developers.google.com/ar;end;`;
-                
-                arAndroidButton.textContent = 'Android AR ile Gör';
-                arAndroidButton.href = sceneViewerUrl;
-            }
-            
-            // iOS için AR Quick Look'u kur
-            function setupIOSAR() {
-                // USDZ formatına dönüştürülmüş model URL'si (Quick Look için gerekli)
-                // Not: GLTF modellerinizi USDZ formatına dönüştürmeniz gerekir
-                // Şimdilik örnek bir URL kullanıyoruz
-                const usdzPath = "https://modelviewer.dev/shared-assets/models/Astronaut.usdz";
-                
-                arIosButton.textContent = 'iPhone AR ile Gör';
-                arIosButton.href = usdzPath;
-            }
             
             // AR durumunu kontrol et ve göster
             checkARSupport();
@@ -165,13 +147,11 @@
             function checkARSupport() {
                 let statusHTML = '<div class="ar-status">';
                 
-                if (isIOS) {
-                    statusHTML += '<p class="supported">✓ iPhone AR destekleniyor</p>';
-                } else if (isAndroid) {
-                    statusHTML += '<p class="supported">✓ Android AR destekleniyor</p>';
+                if (isAndroid) {
+                    statusHTML += '<p class="supported">✓ Android cihaz tespit edildi</p>';
+                    statusHTML += '<p>Google AR Services yüklü olmalıdır</p>';
                 } else {
-                    statusHTML += '<p class="not-supported">✗ Cihazınız tanınamadı</p>';
-                    statusHTML += '<p>Lütfen mobil cihaz kullanın</p>';
+                    statusHTML += '<p class="not-supported">Bu site Android cihazlarda en iyi çalışır</p>';
                 }
                 
                 arStatusContainer.innerHTML = statusHTML + '</div>';
@@ -216,11 +196,6 @@
             // Model yüklemesi için olay dinleyicisi
             modelViewer.addEventListener('load', function() {
                 console.log("Model başarıyla yüklendi");
-                
-                // Model yüklendiğinde Android butonunu güncelle
-                if (isAndroid) {
-                    setupAndroidAR();
-                }
             });
             
             // Sayfa yüklendiğinde QR kodu oluştur
@@ -239,11 +214,6 @@
                 
                 // Kendi modelinizi kullanın
                 modelViewer.src = `models/${modelParam}.gltf`;
-                
-                // AR butonlarını güncelle
-                if (isAndroid) {
-                    setupAndroidAR();
-                }
             }
             
             // Model değiştiğinde
@@ -251,11 +221,6 @@
                 const selectedModel = this.value;
                 modelViewer.src = `models/${selectedModel}.gltf`;
                 generateQRCode(selectedModel);
-                
-                // AR butonlarını güncelle
-                if (isAndroid) {
-                    setupAndroidAR();
-                }
             });
         });
     </script>
