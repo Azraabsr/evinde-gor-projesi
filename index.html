@@ -247,76 +247,76 @@
 
     <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener("DOMContentLoaded", function() {
             // URL parametrelerini alma
             const urlParams = new URLSearchParams(window.location.search);
-            const modelParam = urlParams.get('model') || 'old_chair.gltf';
-            const scaleParam = urlParams.get('scale') || 0.1;
-            const nameParam = urlParams.get('name') || 'Ahşap Sandalye';
-            const featuresParam = urlParams.get('features');
+            const modelParam = urlParams.get("model") || "old_chair.gltf";
+            const scaleParam = urlParams.get("scale") || 0.1;
+            const nameParam = urlParams.get("name") || "Ahşap Sandalye";
+            const featuresParam = urlParams.get("features");
             
             // Model Viewer referansı
-            const modelViewer = document.getElementById('product-model');
-            const loadingSpinner = document.getElementById('loading-spinner');
-            const scaleButtons = document.querySelectorAll('.scale-button');
-            const sceneViewerLink = document.getElementById('scene-viewer-link');
-            const directLink = document.getElementById('direct-link');
-            const qrCodeContainer = document.getElementById('qr-code-container');
+            const modelViewer = document.getElementById("product-model");
+            const loadingSpinner = document.getElementById("loading-spinner");
+            const scaleButtons = document.querySelectorAll(".scale-button");
+            const sceneViewerLink = document.getElementById("scene-viewer-link");
+            const directLink = document.getElementById("direct-link");
+            const qrCodeContainer = document.getElementById("qr-code-container");
             
             // Tarayıcı kontrolü
             const isChrome = navigator.userAgent.indexOf("Chrome") !== -1;
-            const browserWarning = document.getElementById('browser-warning');
+            const browserWarning = document.getElementById("browser-warning");
             if (!isChrome) {
-                browserWarning.style.display = 'block';
+                browserWarning.style.display = "block";
             }
             
             // URL oluştur
             function createArUrl(modelFileName, scale) {
-                const baseUrl = window.location.origin + window.location.pathname.replace('index.html', '');
-                const modelUrl = `${baseUrl}models/${modelFileName}`;
-                return `https://arvr.google.com/scene-viewer/1.0?file=${modelUrl}&mode=ar_preferred&scale=${scale}`;
+                const baseUrl = window.location.origin + window.location.pathname.replace("index.html", "");
+                const modelUrl = baseUrl + "models/" + modelFileName;
+                return "https://arvr.google.com/scene-viewer/1.0?file=" + modelUrl + "&mode=ar_preferred&scale=" + scale;
             }
             
             // QR kod oluştur
             function generateQRCode(url) {
                 try {
-                    const qr = qrcode(10, 'L');
+                    const qr = qrcode(10, "L");
                     qr.addData(url);
                     qr.make();
                     
                     qrCodeContainer.innerHTML = qr.createImgTag(4);
                 } catch (error) {
-                    console.error('QR kod oluşturma hatası:', error);
-                    qrCodeContainer.innerHTML = '<p>QR kod oluşturulamadı.</p>';
+                    console.error("QR kod oluşturma hatası:", error);
+                    qrCodeContainer.innerHTML = "<p>QR kod oluşturulamadı.</p>";
                 }
             }
             
             // Model parametresini ayarla
-            modelViewer.src = `models/${modelParam}`;
+            modelViewer.src = "models/" + modelParam;
             
             // Ölçek parametresini ayarla
-            modelViewer.setAttribute('scale', `${scaleParam} ${scaleParam} ${scaleParam}`);
+            modelViewer.setAttribute("scale", scaleParam + " " + scaleParam + " " + scaleParam);
             
             // Active scale button'u ayarla
             scaleButtons.forEach(button => {
                 if (button.dataset.scale === String(scaleParam)) {
-                    button.classList.add('active');
+                    button.classList.add("active");
                 } else {
-                    button.classList.remove('active');
+                    button.classList.remove("active");
                 }
             });
             
             // Ürün adını ayarla
-            document.getElementById('product-name').textContent = nameParam;
+            document.getElementById("product-name").textContent = nameParam;
             
             // Özellikleri ayarla
             if (featuresParam) {
-                const features = featuresParam.split(',');
-                const featureList = document.getElementById('feature-list');
-                featureList.innerHTML = ''; // Mevcut özellikleri temizle
+                const features = featuresParam.split(",");
+                const featureList = document.getElementById("feature-list");
+                featureList.innerHTML = ""; // Mevcut özellikleri temizle
                 
                 features.forEach(feature => {
-                    const li = document.createElement('li');
+                    const li = document.createElement("li");
                     li.textContent = feature;
                     featureList.appendChild(li);
                 });
@@ -326,31 +326,31 @@
             const arUrl = createArUrl(modelParam, scaleParam);
             sceneViewerLink.href = arUrl;
             directLink.href = arUrl;
-            directLink.textContent = `Doğrudan Link: ${modelParam}`;
+            directLink.textContent = "Doğrudan Link: " + modelParam;
             
             // QR kod oluştur
             generateQRCode(arUrl);
             
             // Yükleme göstergesi
-            modelViewer.addEventListener('progress', (event) => {
+            modelViewer.addEventListener("progress", (event) => {
                 if (event.detail.totalProgress < 1) {
-                    loadingSpinner.style.display = 'block';
+                    loadingSpinner.style.display = "block";
                 } else {
-                    loadingSpinner.style.display = 'none';
+                    loadingSpinner.style.display = "none";
                 }
             });
             
             // Ölçek butonları işlevselliği
             scaleButtons.forEach(button => {
-                button.addEventListener('click', function() {
+                button.addEventListener("click", function() {
                     const scale = this.dataset.scale;
                     
                     // Active class güncelle
-                    scaleButtons.forEach(btn => btn.classList.remove('active'));
-                    this.classList.add('active');
+                    scaleButtons.forEach(btn => btn.classList.remove("active"));
+                    this.classList.add("active");
                     
                     // Model Viewer ölçeğini güncelle
-                    modelViewer.setAttribute('scale', `${scale} ${scale} ${scale}`);
+                    modelViewer.setAttribute("scale", scale + " " + scale + " " + scale);
                     
                     // Scene Viewer linkini güncelle
                     const newArUrl = createArUrl(modelParam, scale);
@@ -363,12 +363,12 @@
             });
             
             // AR butonuna tıklanınca yapılacaklar
-            sceneViewerLink.addEventListener('click', function(event) {
+            sceneViewerLink.addEventListener("click", function(event) {
                 // Android cihazlarda direkt link çalışır
                 const isAndroid = /Android/i.test(navigator.userAgent);
                 if (!isAndroid) {
                     event.preventDefault();
-                    alert('AR özelliği şu anda sadece Android cihazlarda desteklenmektedir.');
+                    alert("AR özelliği şu anda sadece Android cihazlarda desteklenmektedir.");
                 }
             });
         });
