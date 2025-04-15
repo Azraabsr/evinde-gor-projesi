@@ -118,10 +118,16 @@
         auto-rotate>    
     </model-viewer>
     
-    <!-- Android için Doğrudan AR Butonu -->
-    <button onclick="launchAndroidAR()" class="button">
-        Android AR ile Görüntüle
-    </button>
+    <!-- AR için butonlar -->
+    <div style="display: flex; flex-direction: column; align-items: center; gap: 10px;">
+        <button onclick="launchBasicAR()" class="button">
+            Basit AR (Önerilen)
+        </button>
+        
+        <button onclick="launchScaledAR()" class="button" style="background-color: #ff9800;">
+            Ölçekli AR
+        </button>
+    </div>
 
     <script>
         // Global değişkenler
@@ -134,34 +140,38 @@
             console.log(`Model ölçeği ${scale} olarak ayarlandı`);
         }
         
-        // Android AR'ı başlatma fonksiyonu
-        function launchAndroidAR() {
-            // Google'ın örnek modellerinden birini kullanalım (güvenilir kaynak)
-            // const modelUrl = "https://modelviewer.dev/shared-assets/models/Astronaut.glb";
-            
+        // En basit AR deneyimi (en güvenilir)
+        function launchBasicAR() {
             // Kendi modelimiz
             const modelUrl = "https://Azraabsr.github.io/evinde-gor-projesi/models/old_chair.gltf";
             
-            // Scene Viewer URL'sini optimize edilmiş parametrelerle oluştur
-            // scale: Ölçeği ayarlar (0-100 arası, 100 = %100)
-            const scalePercent = Math.min(Math.max(currentModelScale * 50, 10), 100); // Ölçeği 10-100 arasında sınırla
-            
-            const sceneViewerUrl = `https://arvr.google.com/scene-viewer/1.0?file=${modelUrl}&mode=ar_preferred&title=Evinde%20G%C3%B6r&resizable=true&disable_occlusion=true&initial_scale=${scalePercent}`;
-            
-            // Backup URL: Eğer yukarıdaki URL çalışmazsa
-            const backupUrl = `intent://arvr.google.com/scene-viewer/1.0?file=${modelUrl}&mode=ar_preferred&title=Evinde%20G%C3%B6r&resizable=true&initial_scale=${scalePercent}#Intent;scheme=https;package=com.google.android.googlequicksearchbox;action=android.intent.action.VIEW;S.browser_fallback_url=https://Azraabsr.github.io/evinde-gor-projesi;end;`;
+            // En basit Scene Viewer URL'si - minimum parametre
+            const sceneViewerUrl = `https://arvr.google.com/scene-viewer/1.0?file=${modelUrl}&mode=ar_preferred`;
             
             try {
-                console.log("Android AR başlatılıyor...");
-                console.log("Ölçek:", scalePercent, "% olarak ayarlandı");
-                
-                // Önce birinci yöntemi dene
+                console.log("Basit AR başlatılıyor...");
                 window.location = sceneViewerUrl;
-                
-                // 1 saniye sonra yine de çalışmadıysa ikinci yöntemi dene
-                setTimeout(function() {
-                    window.location = backupUrl;
-                }, 1000);
+            } catch (error) {
+                console.error("AR başlatılamadı:", error);
+                alert("AR başlatılamadı. Lütfen Chrome veya Samsung Internet tarayıcısı kullanın.");
+            }
+        }
+        
+        // Ölçeklendirilmiş AR deneyimi
+        function launchScaledAR() {
+            // Kendi modelimiz
+            const modelUrl = "https://Azraabsr.github.io/evinde-gor-projesi/models/old_chair.gltf";
+            
+            // Ölçek hesaplama
+            const scalePercent = Math.min(Math.max(currentModelScale * 50, 10), 100); // Ölçeği 10-100 arasında sınırla
+            
+            // Ölçekli Scene Viewer URL'si
+            const sceneViewerUrl = `https://arvr.google.com/scene-viewer/1.0?file=${modelUrl}&mode=ar_preferred&initial_scale=${scalePercent}`;
+            
+            try {
+                console.log("Ölçekli AR başlatılıyor...");
+                console.log("Ölçek:", scalePercent, "% olarak ayarlandı");
+                window.location = sceneViewerUrl;
             } catch (error) {
                 console.error("AR başlatılamadı:", error);
                 alert("AR başlatılamadı. Lütfen Chrome veya Samsung Internet tarayıcısı kullanın.");
