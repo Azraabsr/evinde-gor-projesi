@@ -48,12 +48,13 @@
             background-color: #4CAF50;
             color: white;
             border: none;
-            padding: 10px 15px;
+            padding: 15px;
             border-radius: 5px;
             cursor: pointer;
-            font-size: 16px;
+            font-size: 18px;
             margin: 20px auto;
-            width: 200px;
+            width: 250px;
+            font-weight: bold;
         }
         .ar-info {
             text-align: center;
@@ -72,6 +73,18 @@
         }
         .not-supported {
             color: red;
+        }
+        #custom-ar-button {
+            display: block;
+            margin: 20px auto;
+            padding: 15px 30px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
         }
     </style>
 </head>
@@ -97,9 +110,8 @@
         <div id="ar-status-container"></div>
     </div>
     
-    <button onclick="activateAR()" class="evinde-gor-button">
-        Evinde Gör (AR)
-    </button>
+    <!-- Kendi özel AR butonumuz -->
+    <button id="custom-ar-button">AR'da Görüntüle</button>
 
     <model-viewer 
         id="ar-viewer"
@@ -113,32 +125,23 @@
         environment-image="neutral"
         shadow-intensity="1"
         auto-rotate>    
-        <button slot="ar-button" class="ar-button">
-            AR'da Görüntüle
-        </button>
     </model-viewer>
 
     <script>
-        // AR'ı aktifleştir
-        function activateAR() {
-            // AR butonuna tıklama olayı ekle
-            const arButton = document.querySelector('model-viewer').shadowRoot.querySelector('button[slot="ar-button"]');
-            
-            if (arButton) {
-                // AR butonuna tıkla
-                arButton.click();
-                console.log("AR butonu tıklandı");
-            } else {
-                console.error("AR butonu bulunamadı");
-                alert("AR butonu bulunamadı. Lütfen farklı bir tarayıcı veya cihaz kullanın.");
-            }
-        }
-        
         document.addEventListener('DOMContentLoaded', function() {
             const modelSelector = document.getElementById('modelSelector');
             const modelViewer = document.getElementById('ar-viewer');
             const qrcodeContainer = document.getElementById('qrcode');
             const arStatusContainer = document.getElementById('ar-status-container');
+            const customArButton = document.getElementById('custom-ar-button');
+            
+            // Özel AR butonu işlevselliği
+            customArButton.addEventListener('click', function() {
+                // Model-viewer'ın AR modunu aktifleştir
+                modelViewer.activateAR();
+                
+                console.log("Özel AR butonu tıklandı");
+            });
             
             // AR durumunu kontrol et ve göster
             checkARSupport();
