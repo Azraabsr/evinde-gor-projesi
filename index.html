@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Evinde Gör - 3D AR Deneyimi</title>
-    <!-- Model Viewer kütüphanesi -->
-    <script type="module" src="https://unpkg.com/@google/model-viewer@2.0.0/dist/model-viewer.min.js"></script>
+    <!-- En son Model Viewer sürümünü kullanın -->
+    <script type="module" src="https://unpkg.com/@google/model-viewer@2.1.1/dist/model-viewer.min.js"></script>
     <!-- QR kod için -->
     <script src="https://cdn.rawgit.com/davidshimjs/qrcodejs/gh-pages/qrcode.min.js"></script>
     <style>
@@ -173,6 +173,16 @@
             padding-left: 20px;
         }
         
+        /* AR düğmesini özelleştirme */
+        model-viewer::part(default-ar-button) {
+            background-color: #4CAF50;
+            color: white;
+            border-radius: 4px;
+            border: none;
+            font-weight: bold;
+            padding: 10px 20px;
+        }
+        
         footer {
             text-align: center;
             padding: 20px;
@@ -216,7 +226,7 @@
         <div class="viewer-container">
             <model-viewer 
                 id="product-model"
-                src="models/Holofil-couch.glb" 
+                src="models/old_chair.gltf" 
                 alt="3D Ürün Modeli" 
                 camera-controls 
                 auto-rotate 
@@ -225,9 +235,15 @@
                 shadow-intensity="1"
                 ar
                 ar-modes="webxr scene-viewer quick-look"
-                ar-scale="auto">
+                ar-scale="fixed"
+                ar-placement="floor"
+                ar-status="not-presenting"
+                interaction-policy="allow-when-focused"
+                camera-orbit="0deg 75deg auto"
+                min-camera-orbit="auto auto auto"
+                max-camera-orbit="auto auto auto">
                 <button slot="ar-button" class="ar-button">
-                    Evinde Gör
+                    Evinde Gör (Zeminde Sabit)
                 </button>
             </model-viewer>
         </div>
@@ -267,10 +283,10 @@
                 <h3>Nasıl Kullanılır?</h3>
                 <ol>
                     <li>Telefonunuzda "Evinde Gör" butonuna tıklayın</li>
-                    <li>Telefonunuzu evinizin zeminine doğrultun</li>
+                    <li>Telefonunuzu evinizin zeminine doğrultun ve taramaya izin verin</li>
                     <li>Modeli yerleştirmek için ekrana dokunun</li>
-                    <li>Modeli döndürmek ve taşımak için parmağınızla kaydırın</li>
-                    <li>Yakınlaştırmak için iki parmakla sıkıştırma/açma hareketi yapın</li>
+                    <li>Model sabit kalacak, siz etrafında dolaşabilirsiniz</li>
+                    <li>Her açıdan modeli inceleyebilirsiniz</li>
                 </ol>
             </div>
         </div>
@@ -306,24 +322,28 @@
             const baseUrl = "https://azraabsr.github.io/evinde-gor-projesi/";
             
             // Varsayılan model
-            let currentModel = "Holofil-couch.glb";
+            let currentModel = modelSelector.value;
+            modelViewer.src = `models/${currentModel}`;
             
             // AR butonlarını güncelle
             function updateARButtons(model, scale) {
                 const modelPath = `models/${model}`;
                 const fullModelUrl = `${baseUrl}${modelPath}`;
                 
+                // Zemine sabitleme parametrelerini ekle
+                const arParams = `&resizable=false&placement=floor&displayMode=anchored`;
+                
                 // Scene Viewer (Android) butonları için URL'ler
-                const normalScaleUrl = `https://arvr.google.com/scene-viewer/1.0?file=${fullModelUrl}&mode=ar_preferred&scale=${scale}`;
-                const smallScaleUrl = `https://arvr.google.com/scene-viewer/1.0?file=${fullModelUrl}&mode=ar_preferred&scale=0.01`;
+                const normalScaleUrl = `https://arvr.google.com/scene-viewer/1.0?file=${fullModelUrl}&mode=ar_preferred&scale=${scale}${arParams}`;
+                const smallScaleUrl = `https://arvr.google.com/scene-viewer/1.0?file=${fullModelUrl}&mode=ar_preferred&scale=0.01${arParams}`;
                 
                 arButtonsContainer.innerHTML = `
                     <a href="${normalScaleUrl}" class="ar-button">
-                        AR ile Görüntüle (Seçilen Ölçek: ${scale})
+                        AR ile Zeminde Görüntüle (Seçilen Ölçek: ${scale})
                     </a>
                     
                     <a href="${smallScaleUrl}" class="ar-button" style="background-color: #FF9800;">
-                        AR ile Görüntüle (Küçük Ölçek: 0.01)
+                        AR ile Zeminde Görüntüle (Küçük Ölçek: 0.01)
                     </a>
                 `;
                 
@@ -389,14 +409,16 @@
                 });
             });
             
-            // AR desteğini kontrol et
-            if (modelViewer) {
-                modelViewer.addEventListener('ar-status', (event) => {
-                    if (event.detail.status === 'failed') {
-                        console.log('AR başlatılamadı:', event.detail.error);
-                    }
-                });
-            }
+            // AR olaylarını izle
+            modelViewer.addEventListener('ar-status', (event) => {
+                if (event.detail.status === 'session-started') {
+                    console.log('AR oturumu başladı');
+                } else if (event.detail.status === 'object-placed') {
+                    console.log('Model yerleştirildi');
+                } else if (event.detail.status === 'failed') {
+                    console.log('AR başlatılamadı:', event.detail.error);
+                }
+            });
             
             // Sayfa yüklendiğinde AR butonlarını oluştur
             updateARButtons(currentModel, currentScale);
