@@ -38,10 +38,19 @@
             padding: 8px;
             font-size: 16px;
         }
-        .url-display {
-            text-align: center;
-            margin: 10px 0;
-            word-break: break-all;
+        .evinde-gor-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 20px auto;
+            width: 200px;
         }
     </style>
 </head>
@@ -58,15 +67,13 @@
     
     <div id="qrcode"></div>
     
-    <div class="evinde-gor-container">
-        <button onclick="showARModal()" class="evinde-gor-button">
-            <img src="ar-icon.png" alt="AR İkonu"> Evinde Gör
-        </button>
-    </div>
+    <button onclick="showARModal()" class="evinde-gor-button">
+        Evinde Gör
+    </button>
 
     <model-viewer 
         id="ar-viewer"
-        src="models/old_chair.gltf" 
+        src="https://modelviewer.dev/shared-assets/models/old_chair.gltf" 
         alt="3D Model" 
         ar 
         ar-modes="webxr scene-viewer quick-look" 
@@ -78,43 +85,56 @@
     </model-viewer>
 
     <script>
+        // AR modal fonksiyonu
+        function showARModal() {
+            // AR butonuna tıklama olayı ekle
+            const arButton = document.querySelector('.ar-button');
+            if (arButton) {
+                arButton.click(); // AR modunu otomatik başlat
+            }
+        }
+        
         document.addEventListener('DOMContentLoaded', function() {
             const modelSelector = document.getElementById('modelSelector');
             const modelViewer = document.getElementById('ar-viewer');
             const qrcodeContainer = document.getElementById('qrcode');
             
             function generateQRCode(modelName) {
-                // Tam mutlak URL oluştur
-                // NOT: Bu kısmı kendi web sitenizin gerçek URL'si ile değiştirin
-                const websiteUrl = "http://127.0.0.1:5500/index.html?model=old_chair";
-                // veya geliştirme aşamasında
-                // const websiteUrl = "http://192.168.1.X:XXXX"; // Yerel IP adresiniz ve port
-                
-                // Oluşturulacak QR kod URL'i
-                const arUrl = `${websiteUrl}?model=${modelName}`;
-                
-                // QR kod oluştur
-                const qr = qrcode(4, 'M'); // 4: Daha yüksek sürüm, daha fazla veri saklayabilir
-                qr.addData(arUrl);
-                qr.make();
-                
-                // Eski QR kodu temizle
-                qrcodeContainer.innerHTML = '';
-                
-                // Yeni QR kodu ekle
-                const qrImage = qr.createImgTag(5);
-                qrcodeContainer.innerHTML = `
-                    <div>
-                        <h3>Bu ürünü evinde görmek için QR kodu tara</h3>
-                        ${qrImage}
-                        <div class="url-display">
-                            <p>URL: <a href="${arUrl}" target="_blank">${arUrl}</a></p>
-                            <p>QR kodu tarayamıyorsanız, linke tıklayabilir veya linki kopyalayabilirsiniz</p>
+                try {
+                    // QR kod oluşturma (Sürüm 10 kullanarak)
+                    const qr = qrcode(10, 'L'); // Sürüm 10 kullanın (daha fazla veri kapasitesi için)
+                    
+                    // URL'yi mümkün olduğunca kısa tutun
+                    const websiteUrl = "https://Azraabsr.github.io/evinde-gor-projesi";
+                    const arUrl = `${websiteUrl}?m=${modelName}`; // m parametresi (kısa)
+                    
+                    qr.addData(arUrl);
+                    qr.make();
+                    
+                    // QR kodu oluştur
+                    const qrImage = qr.createImgTag(5);
+                    qrcodeContainer.innerHTML = `
+                        <div>
+                            <h3>Bu ürünü evinde görmek için QR kodu tara</h3>
+                            ${qrImage}
+                            <p><a href="${arUrl}" target="_blank">Direkt Link</a></p>
                         </div>
-                    </div>
-                `;
-
-                // Debug için konsola yazdır
+                    `;
+                } catch (error) {
+                    console.error("QR kod oluşturma hatası:", error);
+                    
+                    // QR kod oluşturulamazsa sadece link göster
+                    const websiteUrl = "https://Azraabsr.github.io/evinde-gor-projesi";
+                    const arUrl = `${websiteUrl}?m=${modelName}`;
+                    
+                    qrcodeContainer.innerHTML = `
+                        <div>
+                            <h3>Ürünü evinde görmek için linke tıkla</h3>
+                            <p><a href="${arUrl}" target="_blank">Evinde Gör</a></p>
+                        </div>
+                    `;
+                }
+                
                 console.log("Oluşturulan URL:", arUrl);
             }
             
@@ -123,17 +143,25 @@
             
             // URL'den model parametresini kontrol et
             const urlParams = new URLSearchParams(window.location.search);
-            const modelParam = urlParams.get('model');
+            const modelParam = urlParams.get('m'); // 'm' olarak kısalttık
             
             if (modelParam) {
                 console.log("URL'den model yükleniyor:", modelParam);
                 modelSelector.value = modelParam;
-                // Model dosyasının tam yolunu belirt
-                modelViewer.src = `models/${modelParam}.gltf`;
-                // Model yüklenme durumunu kontrol et
+                
+                // Hazır modelleri kullan
+                if (modelParam === 'old_chair') {
+                    modelViewer.src = "https://modelviewer.dev/shared-assets/models/old_chair.gltf";
+                } else if (modelParam === 'modern_chair') {
+                    modelViewer.src = "https://modelviewer.dev/shared-assets/models/modern_chair.gltf";
+                } else if (modelParam === 'table') {
+                    modelViewer.src = "https://modelviewer.dev/shared-assets/models/table.gltf";
+                }
+                
                 modelViewer.addEventListener('load', function() {
                     console.log("Model başarıyla yüklendi");
                 });
+                
                 modelViewer.addEventListener('error', function(error) {
                     console.error("Model yüklenirken hata oluştu:", error);
                 });
@@ -142,7 +170,16 @@
             // Model değiştiğinde
             modelSelector.addEventListener('change', function() {
                 const selectedModel = this.value;
-                modelViewer.src = `models/${selectedModel}.gltf`;
+                
+                // Hazır modelleri kullan
+                if (selectedModel === 'old_chair') {
+                    modelViewer.src = "https://modelviewer.dev/shared-assets/models/old_chair.gltf";
+                } else if (selectedModel === 'modern_chair') {
+                    modelViewer.src = "https://modelviewer.dev/shared-assets/models/modern_chair.gltf";
+                } else if (selectedModel === 'table') {
+                    modelViewer.src = "https://modelviewer.dev/shared-assets/models/table.gltf";
+                }
+                
                 generateQRCode(selectedModel);
             });
             
@@ -154,7 +191,6 @@
                             console.log('AR destekleniyor');
                         } else {
                             console.log('AR desteklenmiyor');
-                            // Kullanıcıya bildir
                             const arStatus = document.createElement('div');
                             arStatus.innerHTML = '<p style="color: red; text-align: center;">Cihazınız AR özelliğini desteklemiyor</p>';
                             document.body.appendChild(arStatus);
