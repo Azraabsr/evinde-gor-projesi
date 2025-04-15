@@ -58,19 +58,15 @@
             border-radius: 5px;
             font-weight: bold;
         }
-        .scale-buttons {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            margin: 10px 0;
+        .warning {
+            color: red;
+            font-weight: bold;
         }
-        .scale-button {
-            padding: 5px 10px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
+        .mobile-only {
+            display: none;
+        }
+        .desktop-only {
+            display: none;
         }
     </style>
 </head>
@@ -86,22 +82,15 @@
     <div id="qrcode"></div>
     
     <div class="ar-info">
-        <p>Modelin ölçeğini ayarlamak için:</p>
-        <div class="scale-buttons">
-            <button class="scale-button" onclick="setModelScale(0.1)">Çok Küçük</button>
-            <button class="scale-button" onclick="setModelScale(0.5)">Küçük</button>
-            <button class="scale-button" onclick="setModelScale(1)">Normal</button>
-            <button class="scale-button" onclick="setModelScale(2)">Büyük</button>
-        </div>
+        <div id="device-info"></div>
         
         <div class="ar-tips">
-            <p>Model yanlış yerde görünüyorsa:</p>
+            <p>AR düzgün çalışmazsa:</p>
             <ol style="text-align: left; max-width: 400px; margin: 0 auto;">
-                <li>Uygulamadan çıkıp tekrar deneyin</li>
+                <li>Chrome veya Samsung Internet tarayıcısı kullanın</li>
+                <li>Google Play Store'dan AR Services'in yüklü olduğundan emin olun</li>
                 <li>Daha iyi ışık olan bir ortamda deneyin</li>
-                <li>Farklı bir ölçek seçin</li>
                 <li>Telefonu daha yavaş hareket ettirin</li>
-                <li>Zemini daha fazla taratın</li>
             </ol>
         </div>
     </div>
@@ -114,67 +103,73 @@
         camera-controls
         environment-image="neutral"
         shadow-intensity="1"
-        scale="1 1 1"
         auto-rotate>    
     </model-viewer>
     
-    <!-- AR için butonlar -->
-    <div style="display: flex; flex-direction: column; align-items: center; gap: 10px;">
-        <button onclick="launchBasicAR()" class="button">
-            Basit AR (Önerilen)
+    <!-- AR butonları (sadece mobil cihazlar için gösterilir) -->
+    <div id="ar-buttons" class="mobile-only">
+        <button onclick="launchGoogleModel()" class="button">
+            Test AR (Google Modeli)
         </button>
         
-        <button onclick="launchScaledAR()" class="button" style="background-color: #ff9800;">
-            Ölçekli AR
+        <button onclick="launchOurModel()" class="button" style="background-color: #ff9800;">
+            AR ile Görüntüle (Kendi Modelimiz)
         </button>
+    </div>
+    
+    <!-- Masaüstü uyarısı (sadece masaüstü cihazlar için gösterilir) -->
+    <div id="desktop-warning" class="desktop-only">
+        <p class="warning">AR özelliği sadece mobil cihazlarda çalışır.</p>
+        <p>Lütfen bu sayfayı akıllı telefonunuzdan ziyaret edin veya QR kodu tarayın.</p>
     </div>
 
     <script>
-        // Global değişkenler
-        let currentModelScale = 1;
+        // Cihaz tipini kontrol et
+        const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        const isAndroid = /Android/i.test(navigator.userAgent);
+        const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
         
-        // Model ölçeğini ayarlama
-        function setModelScale(scale) {
-            currentModelScale = scale;
-            document.getElementById('ar-viewer').setAttribute('scale', `${scale} ${scale} ${scale}`);
-            console.log(`Model ölçeği ${scale} olarak ayarlandı`);
-        }
-        
-        // En basit AR deneyimi (en güvenilir)
-        function launchBasicAR() {
-            // Kendi modelimiz
-            const modelUrl = "https://Azraabsr.github.io/evinde-gor-projesi/models/old_chair.gltf";
-            
-            // En basit Scene Viewer URL'si - minimum parametre
-            const sceneViewerUrl = `https://arvr.google.com/scene-viewer/1.0?file=${modelUrl}&mode=ar_preferred`;
-            
+        // Google'ın test modeli ile AR başlat (en güvenilir)
+        function launchGoogleModel() {
             try {
-                console.log("Basit AR başlatılıyor...");
+                if (!isAndroid) {
+                    alert("Bu özellik sadece Android cihazlarda çalışır");
+                    return;
+                }
+                
+                // Google'ın örnek modeli
+                const modelUrl = "https://storage.googleapis.com/ar-answers-in-search-models/static/Tiger/model.glb";
+                
+                // En basit Scene Viewer URL'si
+                const sceneViewerUrl = `https://arvr.google.com/scene-viewer/1.0?file=${modelUrl}`;
+                
+                console.log("Test AR başlatılıyor...");
                 window.location = sceneViewerUrl;
             } catch (error) {
                 console.error("AR başlatılamadı:", error);
-                alert("AR başlatılamadı. Lütfen Chrome veya Samsung Internet tarayıcısı kullanın.");
+                alert("AR başlatılamadı: " + error.message);
             }
         }
         
-        // Ölçeklendirilmiş AR deneyimi
-        function launchScaledAR() {
-            // Kendi modelimiz
-            const modelUrl = "https://Azraabsr.github.io/evinde-gor-projesi/models/old_chair.gltf";
-            
-            // Ölçek hesaplama
-            const scalePercent = Math.min(Math.max(currentModelScale * 50, 10), 100); // Ölçeği 10-100 arasında sınırla
-            
-            // Ölçekli Scene Viewer URL'si
-            const sceneViewerUrl = `https://arvr.google.com/scene-viewer/1.0?file=${modelUrl}&mode=ar_preferred&initial_scale=${scalePercent}`;
-            
+        // Kendi modelimiz ile AR başlat
+        function launchOurModel() {
             try {
-                console.log("Ölçekli AR başlatılıyor...");
-                console.log("Ölçek:", scalePercent, "% olarak ayarlandı");
+                if (!isAndroid) {
+                    alert("Bu özellik sadece Android cihazlarda çalışır");
+                    return;
+                }
+                
+                // Kendi modelimiz
+                const modelUrl = "https://Azraabsr.github.io/evinde-gor-projesi/models/old_chair.gltf";
+                
+                // En basit Scene Viewer URL'si
+                const sceneViewerUrl = `https://arvr.google.com/scene-viewer/1.0?file=${modelUrl}`;
+                
+                console.log("AR başlatılıyor...");
                 window.location = sceneViewerUrl;
             } catch (error) {
                 console.error("AR başlatılamadı:", error);
-                alert("AR başlatılamadı. Lütfen Chrome veya Samsung Internet tarayıcısı kullanın.");
+                alert("AR başlatılamadı: " + error.message);
             }
         }
         
@@ -182,6 +177,28 @@
             const modelSelector = document.getElementById('modelSelector');
             const modelViewer = document.getElementById('ar-viewer');
             const qrcodeContainer = document.getElementById('qrcode');
+            const deviceInfoContainer = document.getElementById('device-info');
+            const arButtons = document.getElementById('ar-buttons');
+            const desktopWarning = document.getElementById('desktop-warning');
+            
+            // Cihaz tipine göre bilgileri göster
+            if (isMobile) {
+                arButtons.classList.add('mobile-only');
+                arButtons.style.display = 'block';
+                
+                if (isAndroid) {
+                    deviceInfoContainer.innerHTML = '<p class="supported">✓ Android cihaz tespit edildi</p>';
+                } else if (isIOS) {
+                    deviceInfoContainer.innerHTML = '<p class="not-supported">iOS cihaz tespit edildi, AR sadece Android'de çalışır</p>';
+                    arButtons.style.display = 'none';
+                }
+            } else {
+                desktopWarning.classList.add('desktop-only');
+                desktopWarning.style.display = 'block';
+                arButtons.style.display = 'none';
+                
+                deviceInfoContainer.innerHTML = '<p class="not-supported">Masaüstü cihaz tespit edildi, AR özelliği mobil cihazlarda çalışır</p>';
+            }
             
             function generateQRCode(modelName) {
                 // Her iki durumda da kullanılacak değişkenleri dışarıda tanımlayın
@@ -248,9 +265,6 @@
                 modelViewer.src = `models/${selectedModel}.gltf`;
                 generateQRCode(selectedModel);
             });
-            
-            // Varsayılan ölçek ayarı
-            setModelScale(0.5); // Başlangıçta küçük ölçek
         });
     </script>
 </body>
