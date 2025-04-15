@@ -13,20 +13,6 @@
             margin: 0 auto;
             background-color: #f0f0f0;
         }
-        .ar-button {
-            display: block;
-            width: 200px;
-            height: 50px;
-            margin: 20px auto;
-            background-color: #4CAF50;
-            color: white;
-            text-align: center;
-            line-height: 50px;
-            text-decoration: none;
-            border-radius: 5px;
-            font-weight: bold;
-            font-size: 18px;
-        }
         #qrcode {
             display: flex;
             justify-content: center;
@@ -41,20 +27,22 @@
             padding: 8px;
             font-size: 16px;
         }
-        .evinde-gor-button {
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        .button {
+            display: block;
+            width: 80%;
+            max-width: 300px;
+            height: 50px;
+            margin: 20px auto;
             background-color: #4CAF50;
             color: white;
-            border: none;
-            padding: 15px;
+            text-align: center;
+            line-height: 50px;
+            text-decoration: none;
             border-radius: 5px;
-            cursor: pointer;
-            font-size: 18px;
-            margin: 20px auto;
-            width: 250px;
             font-weight: bold;
+            font-size: 18px;
+            border: none;
+            cursor: pointer;
         }
         .ar-info {
             text-align: center;
@@ -73,18 +61,6 @@
         }
         .not-supported {
             color: red;
-        }
-        #custom-ar-button {
-            display: block;
-            margin: 20px auto;
-            padding: 15px 30px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            font-size: 18px;
-            font-weight: bold;
-            cursor: pointer;
         }
     </style>
 </head>
@@ -110,17 +86,23 @@
         <div id="ar-status-container"></div>
     </div>
     
-    <!-- Kendi özel AR butonumuz -->
-    <button id="custom-ar-button">AR'da Görüntüle</button>
+    <!-- AR Butonları -->
+    <div id="ar-buttons">
+        <!-- Android için Scene Viewer butonu -->
+        <a id="ar-android" class="button" style="display: none;">
+            Android AR
+        </a>
+        
+        <!-- iOS için Quick Look butonu -->
+        <a id="ar-ios" rel="ar" class="button" style="display: none;">
+            iPhone AR
+        </a>
+    </div>
 
     <model-viewer 
         id="ar-viewer"
         src="models/old_chair.gltf" 
         alt="3D Model" 
-        ar
-        ar-scale="fixed"
-        ar-placement="floor"
-        ar-modes="webxr scene-viewer quick-look"
         camera-controls
         environment-image="neutral"
         shadow-intensity="1"
@@ -133,15 +115,49 @@
             const modelViewer = document.getElementById('ar-viewer');
             const qrcodeContainer = document.getElementById('qrcode');
             const arStatusContainer = document.getElementById('ar-status-container');
-            const customArButton = document.getElementById('custom-ar-button');
+            const arAndroidButton = document.getElementById('ar-android');
+            const arIosButton = document.getElementById('ar-ios');
             
-            // Özel AR butonu işlevselliği
-            customArButton.addEventListener('click', function() {
-                // Model-viewer'ın AR modunu aktifleştir
-                modelViewer.activateAR();
+            // Cihaz tipini kontrol et
+            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+            const isAndroid = /Android/.test(navigator.userAgent);
+            
+            // AR butonlarını cihaz tipine göre göster
+            if (isIOS) {
+                arIosButton.style.display = 'block';
+                setupIOSAR();
+            } else if (isAndroid) {
+                arAndroidButton.style.display = 'block';
+                setupAndroidAR();
+            } else {
+                // Diğer cihazlar için her iki butonu da göster
+                arIosButton.style.display = 'block';
+                arAndroidButton.style.display = 'block';
+                setupIOSAR();
+                setupAndroidAR();
+            }
+            
+            // Android için Scene Viewer'ı kur
+            function setupAndroidAR() {
+                const modelPath = "https://Azraabsr.github.io/evinde-gor-projesi/models/old_chair.gltf";
                 
-                console.log("Özel AR butonu tıklandı");
-            });
+                // Android Scene Viewer'ı etkinleştir
+                const sceneViewerUrl = `intent://arvr.google.com/scene-viewer/1.0?file=${modelPath}&mode=ar_preferred#Intent;scheme=https;package=com.google.android.googlequicksearchbox;action=android.intent.action.VIEW;S.browser_fallback_url=https://developers.google.com/ar;end;`;
+                
+                arAndroidButton.textContent = 'Android AR ile Gör';
+                arAndroidButton.href = sceneViewerUrl;
+            }
+            
+            // iOS için AR Quick Look'u kur
+            function setupIOSAR() {
+                // USDZ formatına dönüştürülmüş model URL'si (Quick Look için gerekli)
+                // Not: GLTF modellerinizi USDZ formatına dönüştürmeniz gerekir
+                // Şimdilik örnek bir URL kullanıyoruz
+                const usdzPath = "https://modelviewer.dev/shared-assets/models/Astronaut.usdz";
+                
+                arIosButton.textContent = 'iPhone AR ile Gör';
+                arIosButton.href = usdzPath;
+            }
             
             // AR durumunu kontrol et ve göster
             checkARSupport();
@@ -149,26 +165,16 @@
             function checkARSupport() {
                 let statusHTML = '<div class="ar-status">';
                 
-                // WebXR API kontrolü
-                if (navigator.xr) {
-                    navigator.xr.isSessionSupported('immersive-ar')
-                        .then((supported) => {
-                            if (supported) {
-                                statusHTML += '<p class="supported">✓ AR destekleniyor</p>';
-                            } else {
-                                statusHTML += '<p class="not-supported">✗ Cihazınız AR desteği sunmuyor</p>';
-                            }
-                            arStatusContainer.innerHTML = statusHTML + '</div>';
-                        })
-                        .catch(error => {
-                            statusHTML += `<p class="not-supported">✗ AR kontrol edilirken hata: ${error}</p>`;
-                            arStatusContainer.innerHTML = statusHTML + '</div>';
-                        });
+                if (isIOS) {
+                    statusHTML += '<p class="supported">✓ iPhone AR destekleniyor</p>';
+                } else if (isAndroid) {
+                    statusHTML += '<p class="supported">✓ Android AR destekleniyor</p>';
                 } else {
-                    statusHTML += '<p class="not-supported">✗ Tarayıcınız WebXR API desteklemiyor</p>';
-                    statusHTML += '<p>Önerilen: Chrome, Safari (iOS), Samsung Internet</p>';
-                    arStatusContainer.innerHTML = statusHTML + '</div>';
+                    statusHTML += '<p class="not-supported">✗ Cihazınız tanınamadı</p>';
+                    statusHTML += '<p>Lütfen mobil cihaz kullanın</p>';
                 }
+                
+                arStatusContainer.innerHTML = statusHTML + '</div>';
             }
             
             function generateQRCode(modelName) {
@@ -210,19 +216,11 @@
             // Model yüklemesi için olay dinleyicisi
             modelViewer.addEventListener('load', function() {
                 console.log("Model başarıyla yüklendi");
-            });
-            
-            modelViewer.addEventListener('error', function(error) {
-                console.error("Model yüklenirken hata oluştu:", error);
-            });
-            
-            // AR modu için olay dinleyicileri
-            modelViewer.addEventListener('ar-status', event => {
-                console.log('AR Status:', event.detail.status);
-            });
-            
-            modelViewer.addEventListener('ar-tracking', event => {
-                console.log('AR Tracking:', event.detail.status);
+                
+                // Model yüklendiğinde Android butonunu güncelle
+                if (isAndroid) {
+                    setupAndroidAR();
+                }
             });
             
             // Sayfa yüklendiğinde QR kodu oluştur
@@ -241,6 +239,11 @@
                 
                 // Kendi modelinizi kullanın
                 modelViewer.src = `models/${modelParam}.gltf`;
+                
+                // AR butonlarını güncelle
+                if (isAndroid) {
+                    setupAndroidAR();
+                }
             }
             
             // Model değiştiğinde
@@ -248,6 +251,11 @@
                 const selectedModel = this.value;
                 modelViewer.src = `models/${selectedModel}.gltf`;
                 generateQRCode(selectedModel);
+                
+                // AR butonlarını güncelle
+                if (isAndroid) {
+                    setupAndroidAR();
+                }
             });
         });
     </script>
