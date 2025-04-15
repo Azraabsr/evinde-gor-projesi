@@ -38,4 +38,4 @@ function closeARModal() {
     if (modal) {
         document.body.removeChild(modal);
     }
-} 
+}
