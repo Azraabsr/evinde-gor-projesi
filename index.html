@@ -21,18 +21,12 @@
             text-align: center;
             margin-bottom: 20px;
         }
-        .header img {
-            max-width: 150px;
-            height: auto;
-        }
         model-viewer {
             width: 100%;
             height: 400px;
             margin: 0 auto;
             background-color: #fafafa;
             border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
         .product-info {
             background-color: white;
@@ -41,140 +35,39 @@
             margin-top: 20px;
             box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
-        .product-title {
-            font-size: 24px;
-            font-weight: bold;
-            margin: 0 0 10px 0;
-        }
-        .feature-list {
-            list-style-type: none;
-            padding: 0;
-            margin: 15px 0;
-        }
-        .feature-list li {
-            padding: 8px 0;
-            border-bottom: 1px solid #eee;
-            display: flex;
-            align-items: center;
-        }
-        .feature-list li:before {
-            content: "✓";
-            color: #4CAF50;
-            margin-right: 10px;
-            font-weight: bold;
-        }
-        .ar-button {
+        .button {
+            display: block;
+            width: 80%;
+            max-width: 300px;
+            height: 50px;
+            margin: 20px auto;
             background-color: #4CAF50;
             color: white;
-            border: none;
-            padding: 12px 20px;
-            font-size: 16px;
-            font-weight: bold;
-            border-radius: 5px;
-            cursor: pointer;
-            display: block;
-            width: 100%;
             text-align: center;
-            margin-top: 20px;
+            line-height: 50px;
             text-decoration: none;
-        }
-        .ar-info {
-            margin-top: 20px;
-            font-size: 14px;
-            color: #666;
-            text-align: center;
-        }
-        .warning {
-            background-color: #fff3cd;
-            color: #856404;
-            padding: 10px;
             border-radius: 5px;
-            margin: 20px 0;
-            text-align: center;
-        }
-        .alternate-views {
-            display: flex;
-            justify-content: center;
-            margin-top: 15px;
-            gap: 10px;
-        }
-        .view-button {
-            padding: 8px 15px;
-            background-color: #f1f1f1;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
             font-weight: bold;
-            transition: background-color 0.3s;
+            font-size: 18px;
+            border: none;
+            cursor: pointer;
         }
-        .view-button:hover, .view-button.active {
-            background-color: #ddd;
-        }
-        .loading-spinner {
-            display: none;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 1;
-        }
-        .loading-spinner::after {
-            content: "";
-            display: block;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            border: 6px solid #4CAF50;
-            border-color: #4CAF50 transparent #4CAF50 transparent;
-            animation: spin 1.2s linear infinite;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        .progress-bar {
-            width: 0%;
-            height: 5px;
-            background-color: #4CAF50;
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            transition: width 0.3s;
-        }
-        .ar-mode-options {
+        .scale-buttons {
             display: flex;
-            gap: 10px;
             justify-content: center;
-            margin-top: 15px;
-        }
-        .scale-options {
-            display: flex;
             gap: 10px;
-            justify-content: center;
-            margin-top: 15px;
+            margin: 15px 0;
         }
         .scale-button {
-            padding: 5px 10px;
+            padding: 10px;
             background-color: #e9ecef;
             border: none;
             border-radius: 5px;
             cursor: pointer;
-            font-size: 14px;
         }
         .scale-button.active {
             background-color: #4CAF50;
             color: white;
-        }
-        .qr-code {
-            text-align: center;
-            margin-top: 20px;
-        }
-        .qr-code img {
-            max-width: 150px;
-            height: auto;
-        }
-        .direct-link {
-            margin-top: 10px;
         }
     </style>
 </head>
@@ -184,192 +77,64 @@
             <h1>Evinde Gör</h1>
         </div>
         
-        <div class="warning" id="browser-warning" style="display: none;">
-            <p>En iyi deneyim için Chrome tarayıcısı kullanmanızı öneririz.</p>
-        </div>
-        
-        <div class="loading-spinner" id="loading-spinner"></div>
-        
+        <!-- 3D Görüntüleyici -->
         <model-viewer 
             id="product-model"
-            src="models/old_chair.gltf"
-            alt="3D ürün görünümü"
+            src="models/old_chair.gltf" 
+            alt="3D Model"
             camera-controls
-            environment-image="neutral"
-            shadow-intensity="1"
             auto-rotate
-            rotation-per-second="30deg"
-            ar
-            ar-modes="webxr scene-viewer quick-look"
-            ar-scale="fixed">
-            <div class="progress-bar" slot="progress-bar"></div>
-            <button slot="ar-button" class="ar-button">
-                Evinde Gör (AR)
-            </button>
+            environment-image="neutral"
+            shadow-intensity="1">
         </model-viewer>
         
-        <div class="scale-options">
-            <button class="scale-button" data-scale="0.05">Çok Küçük</button>
-            <button class="scale-button active" data-scale="0.1">Küçük</button>
-            <button class="scale-button" data-scale="0.5">Normal</button>
-            <button class="scale-button" data-scale="1">Büyük</button>
+        <div class="scale-buttons">
+            <button class="scale-button active" data-scale="0.01">Çok Küçük (0.01)</button>
+            <button class="scale-button" data-scale="0.05">Küçük (0.05)</button>
+            <button class="scale-button" data-scale="0.1">Normal (0.1)</button>
         </div>
         
         <div class="product-info">
-            <h2 class="product-title" id="product-name">Ahşap Sandalye</h2>
-            <p id="product-description">Doğal ahşap görünümlü, rahat oturumlu klasik sandalye. Her türlü dekorasyona uyum sağlar.</p>
+            <h2>Ahşap Sandalye</h2>
+            <p>Doğal ahşap görünümlü, rahat oturumlu klasik sandalye.</p>
             
-            <ul class="feature-list" id="feature-list">
-                <li>Doğal Ahşap</li>
-                <li>Rahat Oturum</li>
-                <li>Yüksek Kalite</li>
-                <li>Kolay Montaj</li>
-            </ul>
-            
-            <a href="#" id="scene-viewer-link" class="ar-button">
-                AR ile Evinizde Görün
+            <!-- Doğrudan Scene Viewer Butonları (Farklı Ölçekler) -->
+            <a href="https://arvr.google.com/scene-viewer/1.0?file=https://Azraabsr.github.io/evinde-gor-projesi/models/old_chair.gltf&mode=ar_preferred&scale=0.01" class="button">
+                AR Görüntüle (Çok Küçük Ölçek)
             </a>
             
-            <div class="qr-code">
-                <h3>QR Kod ile AR Deneyimini Başlatın</h3>
-                <div id="qr-code-container"></div>
-                <div class="direct-link">
-                    <a href="#" id="direct-link" target="_blank">Direkt Link</a>
-                </div>
+            <a href="https://arvr.google.com/scene-viewer/1.0?file=https://Azraabsr.github.io/evinde-gor-projesi/models/old_chair.gltf&mode=ar_preferred&scale=0.005" class="button" style="background-color: #ff9800;">
+                AR Görüntüle (Daha da Küçük)
+            </a>
+            
+            <a href="https://arvr.google.com/scene-viewer/1.0?file=https://Azraabsr.github.io/evinde-gor-projesi/models/old_chair.gltf&mode=ar_preferred&scale=0.001" class="button" style="background-color: #2196F3;">
+                AR Görüntüle (Minyatür Boyut)
+            </a>
+            
+            <div style="text-align: center; margin-top: 20px;">
+                <p><strong>Yukarıdaki butonlardan birini seçerek AR deneyimini başlatın</strong></p>
+                <p>Not: Model çok büyük görünüyorsa, daha küçük ölçekli butonları deneyin</p>
             </div>
-        </div>
-        
-        <div class="ar-info">
-            <p>AR özelliğini kullanmak için AR destekli bir cihaz ve Chrome tarayıcısı gereklidir.</p>
-            <p>Not: AR modu açıldığında telefonu yavaşça hareket ettirerek zemini taratın.</p>
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
     <script>
         document.addEventListener("DOMContentLoaded", function() {
-            // URL parametrelerini alma
-            const urlParams = new URLSearchParams(window.location.search);
-            const modelParam = urlParams.get("model") || "old_chair.gltf";
-            const scaleParam = urlParams.get("scale") || 0.1;
-            const nameParam = urlParams.get("name") || "Ahşap Sandalye";
-            const featuresParam = urlParams.get("features");
-            
-            // Model Viewer referansı
-            const modelViewer = document.getElementById("product-model");
-            const loadingSpinner = document.getElementById("loading-spinner");
             const scaleButtons = document.querySelectorAll(".scale-button");
-            const sceneViewerLink = document.getElementById("scene-viewer-link");
-            const directLink = document.getElementById("direct-link");
-            const qrCodeContainer = document.getElementById("qr-code-container");
+            const modelViewer = document.getElementById("product-model");
             
-            // Tarayıcı kontrolü
-            const isChrome = navigator.userAgent.indexOf("Chrome") !== -1;
-            const browserWarning = document.getElementById("browser-warning");
-            if (!isChrome) {
-                browserWarning.style.display = "block";
-            }
-            
-            // URL oluştur
-            function createArUrl(modelFileName, scale) {
-                const baseUrl = window.location.origin + window.location.pathname.replace("index.html", "");
-                const modelUrl = baseUrl + "models/" + modelFileName;
-                return "https://arvr.google.com/scene-viewer/1.0?file=" + modelUrl + "&mode=ar_preferred&scale=" + scale;
-            }
-            
-            // QR kod oluştur
-            function generateQRCode(url) {
-                try {
-                    const qr = qrcode(10, "L");
-                    qr.addData(url);
-                    qr.make();
-                    
-                    qrCodeContainer.innerHTML = qr.createImgTag(4);
-                } catch (error) {
-                    console.error("QR kod oluşturma hatası:", error);
-                    qrCodeContainer.innerHTML = "<p>QR kod oluşturulamadı.</p>";
-                }
-            }
-            
-            // Model parametresini ayarla
-            modelViewer.src = "models/" + modelParam;
-            
-            // Ölçek parametresini ayarla
-            modelViewer.setAttribute("scale", scaleParam + " " + scaleParam + " " + scaleParam);
-            
-            // Active scale button'u ayarla
-            scaleButtons.forEach(button => {
-                if (button.dataset.scale === String(scaleParam)) {
-                    button.classList.add("active");
-                } else {
-                    button.classList.remove("active");
-                }
-            });
-            
-            // Ürün adını ayarla
-            document.getElementById("product-name").textContent = nameParam;
-            
-            // Özellikleri ayarla
-            if (featuresParam) {
-                const features = featuresParam.split(",");
-                const featureList = document.getElementById("feature-list");
-                featureList.innerHTML = ""; // Mevcut özellikleri temizle
-                
-                features.forEach(feature => {
-                    const li = document.createElement("li");
-                    li.textContent = feature;
-                    featureList.appendChild(li);
-                });
-            }
-            
-            // Scene Viewer ve Direct Link URL'lerini güncelle
-            const arUrl = createArUrl(modelParam, scaleParam);
-            sceneViewerLink.href = arUrl;
-            directLink.href = arUrl;
-            directLink.textContent = "Doğrudan Link: " + modelParam;
-            
-            // QR kod oluştur
-            generateQRCode(arUrl);
-            
-            // Yükleme göstergesi
-            modelViewer.addEventListener("progress", (event) => {
-                if (event.detail.totalProgress < 1) {
-                    loadingSpinner.style.display = "block";
-                } else {
-                    loadingSpinner.style.display = "none";
-                }
-            });
-            
-            // Ölçek butonları işlevselliği
+            // Ölçek butonları
             scaleButtons.forEach(button => {
                 button.addEventListener("click", function() {
                     const scale = this.dataset.scale;
                     
-                    // Active class güncelle
+                    // Aktif butonu güncelle
                     scaleButtons.forEach(btn => btn.classList.remove("active"));
                     this.classList.add("active");
                     
-                    // Model Viewer ölçeğini güncelle
-                    modelViewer.setAttribute("scale", scale + " " + scale + " " + scale);
-                    
-                    // Scene Viewer linkini güncelle
-                    const newArUrl = createArUrl(modelParam, scale);
-                    sceneViewerLink.href = newArUrl;
-                    directLink.href = newArUrl;
-                    
-                    // QR kodu güncelle
-                    generateQRCode(newArUrl);
+                    // Model ölçeğini güncelle
+                    modelViewer.setAttribute("scale", `${scale} ${scale} ${scale}`);
                 });
-            });
-            
-            // AR butonuna tıklanınca yapılacaklar
-            sceneViewerLink.addEventListener("click", function(event) {
-                // Android cihazlarda direkt link çalışır
-                const isAndroid = /Android/i.test(navigator.userAgent);
-                if (!isAndroid) {
-                    event.preventDefault();
-                    alert("AR özelliği şu anda sadece Android cihazlarda desteklenmektedir.");
-                }
             });
         });
     </script>
