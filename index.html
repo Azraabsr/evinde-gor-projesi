@@ -68,6 +68,20 @@
             border-bottom: 1px solid #eee;
         }
         
+        .model-selector {
+            display: flex;
+            justify-content: center;
+            margin: 15px 0;
+        }
+        
+        select {
+            padding: 8px 16px;
+            border: 1px solid #dadce0;
+            border-radius: 4px;
+            font-size: 16px;
+            background-color: white;
+        }
+        
         .scale-controls {
             display: flex;
             flex-wrap: wrap;
@@ -189,10 +203,20 @@
             <p>Ürünlerimizi Artırılmış Gerçeklik teknolojisi ile evinizde görün</p>
         </header>
         
+        <div class="controls">
+            <h2>Model Seçimi</h2>
+            <div class="model-selector">
+                <select id="model-selector">
+                    <option value="old_chair.gltf">Klasik Sandalye (GLTF)</option>
+                    <option value="Holofil-couch.glb" selected>Koltuk (GLB)</option>
+                </select>
+            </div>
+        </div>
+        
         <div class="viewer-container">
             <model-viewer 
                 id="product-model"
-                src="models/old_chair.gltf" 
+                src="models/Holofil-couch.glb" 
                 alt="3D Ürün Modeli" 
                 camera-controls 
                 auto-rotate 
@@ -235,13 +259,9 @@
                 <strong>Android Kullanıcıları:</strong> Chrome tarayıcısında "Evinde Gör" butonuna tıklayarak veya aşağıdaki linklerden birini kullanarak AR deneyimini başlatabilirsiniz.
             </div>
             
-            <a href="https://arvr.google.com/scene-viewer/1.0?file=https://azraabsr.github.io/evinde-gor-projesi/models/old_chair.gltf&mode=ar_preferred&scale=0.1" class="ar-button">
-                AR ile Görüntüle (Normal)
-            </a>
-            
-            <a href="https://arvr.google.com/scene-viewer/1.0?file=https://azraabsr.github.io/evinde-gor-projesi/models/old_chair.gltf&mode=ar_preferred&scale=0.01" class="ar-button" style="background-color: #FF9800;">
-                AR ile Görüntüle (Küçük)
-            </a>
+            <div id="ar-buttons-container">
+                <!-- AR butonları JavaScript ile doldurulacak -->
+            </div>
             
             <div class="instructions">
                 <h3>Nasıl Kullanılır?</h3>
@@ -271,13 +291,60 @@
         document.addEventListener("DOMContentLoaded", function() {
             // Model görüntüleyici ve kontroller
             const modelViewer = document.getElementById("product-model");
+            const modelSelector = document.getElementById("model-selector");
             const scaleButtons = document.querySelectorAll(".scale-button");
             const deviceInfo = document.getElementById("device-info");
             const iosNotice = document.querySelector(".ios-notice");
             const androidNotice = document.querySelector(".android-notice");
+            const arButtonsContainer = document.getElementById("ar-buttons-container");
             
             // Varsayılan ölçeği ayarla
-            modelViewer.setAttribute("scale", "0.1 0.1 0.1");
+            let currentScale = "0.1";
+            modelViewer.setAttribute("scale", `${currentScale} ${currentScale} ${currentScale}`);
+            
+            // GitHub base URL
+            const baseUrl = "https://azraabsr.github.io/evinde-gor-projesi/";
+            
+            // Varsayılan model
+            let currentModel = "Holofil-couch.glb";
+            
+            // AR butonlarını güncelle
+            function updateARButtons(model, scale) {
+                const modelPath = `models/${model}`;
+                const fullModelUrl = `${baseUrl}${modelPath}`;
+                
+                // Scene Viewer (Android) butonları için URL'ler
+                const normalScaleUrl = `https://arvr.google.com/scene-viewer/1.0?file=${fullModelUrl}&mode=ar_preferred&scale=${scale}`;
+                const smallScaleUrl = `https://arvr.google.com/scene-viewer/1.0?file=${fullModelUrl}&mode=ar_preferred&scale=0.01`;
+                
+                arButtonsContainer.innerHTML = `
+                    <a href="${normalScaleUrl}" class="ar-button">
+                        AR ile Görüntüle (Seçilen Ölçek: ${scale})
+                    </a>
+                    
+                    <a href="${smallScaleUrl}" class="ar-button" style="background-color: #FF9800;">
+                        AR ile Görüntüle (Küçük Ölçek: 0.01)
+                    </a>
+                `;
+                
+                // QR kodunu da güncelle
+                updateQRCode(normalScaleUrl);
+            }
+            
+            // QR kodu güncelle
+            function updateQRCode(url) {
+                const qrcodeContainer = document.getElementById("qrcode");
+                qrcodeContainer.innerHTML = ''; // Önceki QR kodu temizle
+                
+                new QRCode(qrcodeContainer, {
+                    text: url,
+                    width: 150,
+                    height: 150,
+                    colorDark: "#000000",
+                    colorLight: "#ffffff",
+                    correctLevel: QRCode.CorrectLevel.H
+                });
+            }
             
             // Cihaz türünü tespit et
             function detectDevice() {
@@ -298,17 +365,27 @@
                 }
             }
             
+            // Model değiştirme
+            modelSelector.addEventListener("change", function() {
+                currentModel = this.value;
+                modelViewer.src = `models/${currentModel}`;
+                updateARButtons(currentModel, currentScale);
+            });
+            
             // Ölçek butonları
             scaleButtons.forEach(button => {
                 button.addEventListener("click", function() {
-                    const scale = this.dataset.scale;
+                    currentScale = this.dataset.scale;
                     
                     // Aktif buton stilini güncelle
                     scaleButtons.forEach(btn => btn.classList.remove("active"));
                     this.classList.add("active");
                     
                     // Model görüntüleyici ölçeğini ayarla
-                    modelViewer.setAttribute("scale", `${scale} ${scale} ${scale}`);
+                    modelViewer.setAttribute("scale", `${currentScale} ${currentScale} ${currentScale}`);
+                    
+                    // AR butonlarını güncelle
+                    updateARButtons(currentModel, currentScale);
                 });
             });
             
@@ -316,26 +393,13 @@
             if (modelViewer) {
                 modelViewer.addEventListener('ar-status', (event) => {
                     if (event.detail.status === 'failed') {
-                        console.error('AR başlatılamadı:', event.detail.error);
-                        alert('AR özelliği başlatılamadı. Lütfen farklı bir cihaz veya tarayıcı kullanın.');
+                        console.log('AR başlatılamadı:', event.detail.error);
                     }
                 });
             }
             
-            // QR kod oluştur
-            const currentUrl = window.location.href;
-            const baseUrl = currentUrl.split('?')[0]; // Parametreleri temizle
-            const qrUrl = "https://azraabsr.github.io/evinde-gor-projesi/?scale=0.01"; // Önerilen ölçekle
-            
-            // QR kodu oluştur
-            new QRCode(document.getElementById("qrcode"), {
-                text: qrUrl,
-                width: 150,
-                height: 150,
-                colorDark: "#000000",
-                colorLight: "#ffffff",
-                correctLevel: QRCode.CorrectLevel.H
-            });
+            // Sayfa yüklendiğinde AR butonlarını oluştur
+            updateARButtons(currentModel, currentScale);
             
             // Cihaz türünü tespit et ve uygun talimatları göster
             detectDevice();
