@@ -184,7 +184,7 @@
             <div class="controls">
                 <div class="model-selector">
                     <select id="modelSelector">
-                        <option value="eviye">Eviye</option>
+                        <option value="4555457">Eviye</option>
                     </select>
                 </div>
 
@@ -257,7 +257,7 @@
             
             modelSelector.addEventListener('change', function() {
                 const selectedModel = this.value;
-                modelViewer.src = `models/${selectedModel}.glb`;
+                modelViewer.src = `models/${selectedModel}.gltf`;
                 if (qrcodeContainer.style.display === 'block') {
                     generateQRCode(selectedModel);
                 }
