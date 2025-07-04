@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Evinde Gör - AR Deneyimi</title>
+    <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #f5f5f5;
+        }
+
+        .ar-container {
+            position: relative;
+            width: 100%;
+            height: 100vh;
+        }
+
+        model-viewer {
+            width: 100%;
+            height: 100%;
+            background-color: #f5f5f5;
+        }
+
+        .ar-button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255,255,255,0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .loading-text {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-size: 1.2em;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="ar-container">
+        <div id="loading" class="loading-overlay">
+            <div class="loading-text">Model yükleniyor...</div>
+        </div>
+        
+        <model-viewer 
+            id="viewer"
+            src=""
+            alt="3D Model"
+            ar
+            ar-modes="webxr scene-viewer quick-look"
+            camera-controls
+            ar-placement="floor"
+            auto-rotate
+            shadow-intensity="1">
+            <button slot="ar-button" class="ar-button">
+                Evinde Gör
+            </button>
+        </model-viewer>
+    </div>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const modelName = urlParams.get('model');
+        const viewer = document.getElementById('viewer');
+        const loading = document.getElementById('loading');
+        
+        if (modelName) {
+            viewer.src = `models/${modelName}.gltf`;
+        }
+
+        viewer.addEventListener('load', () => {
+            loading.style.display = 'none';
+        });
+
+        viewer.addEventListener('error', () => {
+            loading.innerHTML = '<div class="loading-text">Model yüklenirken bir hata oluştu.</div>';
+        });
+    </script>
+</body>
+</html>
